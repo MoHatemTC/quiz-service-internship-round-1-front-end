@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Quiz Service',
+  title: 'QnA Service',
   description:
     'The QnA Service is a web-based assessment platform that enables administrators to create, manage, and analyze quizzes for learners',
 };
