@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 export default function Home() {
-  return <h1 className="text-display">Hello from nextJS</h1>;
+  redirect('/student');
 }
