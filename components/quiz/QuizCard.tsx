@@ -1,5 +1,3 @@
-'use client';
-
 import { QuizCardProps } from '@/types';
 import Badge from '../ui/Badge';
 import QuizCardActions from './QuizCardActions';
