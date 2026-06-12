@@ -19,8 +19,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
+        console.log("hellllllllo");
         setIsLoadingSummary(true);
         const data = await fetchAnalyticsDashboard();
+        console.log("helllo");
+        console.log(data);
         setSummary(data);
         setError(null);
       } catch (err) {
@@ -40,6 +43,7 @@ export default function AnalyticsPage() {
       try {
         setIsLoadingAttempts(true);
         const data = await fetchQuizAttempts(selectedQuizId);
+        console.log(data);
         setQuizAttempts(data);
         setError(null);
       } catch (err) {
@@ -99,3 +103,5 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+
