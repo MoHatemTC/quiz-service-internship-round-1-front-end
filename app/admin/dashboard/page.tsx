@@ -7,7 +7,7 @@ import { DASHBOARD_STATS } from '@/constants';
 function Dashboard() {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10 border">
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10">
         <div className="flex flex-col gap-4 items-center lg:flex-row lg:items-center">
           <DashboardHeader
             title={'Quiz Management'}
