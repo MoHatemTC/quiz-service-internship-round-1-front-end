@@ -13,7 +13,7 @@ export default function AnalyticsPage() {
   const [isLoadingSummary, setIsLoadingSummary] = useState(true);
   const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedQuizId, setSelectedQuizId] = useState<number>(1);
+  const [selectedQuizName, setSelectedQuizName] = useState<string>('');
 
   // Fetch dashboard summary on mount
   useEffect(() => {
@@ -40,9 +40,10 @@ export default function AnalyticsPage() {
   // Fetch quiz attempts when selected quiz changes
   useEffect(() => {
     const loadQuizAttempts = async () => {
+      if (!selectedQuizName) return;
       try {
         setIsLoadingAttempts(true);
-        const data = await fetchQuizAttempts(selectedQuizId);
+        const data = await fetchQuizAttempts(selectedQuizName);
         console.log(data);
         setQuizAttempts(data);
         setError(null);
@@ -55,7 +56,7 @@ export default function AnalyticsPage() {
     };
 
     loadQuizAttempts();
-  }, [selectedQuizId]);
+  }, [selectedQuizName]);
 
   return (
     <div>
@@ -80,14 +81,15 @@ export default function AnalyticsPage() {
             </h2>
             <div className="flex gap-2">
               <select
-                value={selectedQuizId}
-                onChange={(e) => setSelectedQuizId(parseInt(e.target.value))}
+                value={selectedQuizName}
+                onChange={(e) => setSelectedQuizName(e.target.value)}
                 className="px-4 py-2 bg-[#0F0F17] border border-[#2D2D42] rounded text-[#F4F4F5] focus:outline-none focus:border-[#8B5CF6]"
               >
-                <option value={1}>Quiz ID: 1</option>
-                <option value={2}>Quiz ID: 2</option>
-                <option value={3}>Quiz ID: 3</option>
-                <option value={4}>Quiz ID: 4</option>
+                <option value="">Select a quiz</option>
+                <option value="JavaScript Basics">JavaScript Basics</option>
+                <option value="React Fundamentals">React Fundamentals</option>
+                <option value="TypeScript Advanced">TypeScript Advanced</option>
+                <option value="Web Performance">Web Performance</option>
               </select>
             </div>
           </div>
