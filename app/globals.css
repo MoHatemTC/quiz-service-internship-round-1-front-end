@@ -72,7 +72,7 @@
   --color-error: #ef4444;
   --color-info: #4382df;
 
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-geist-sans);
 
   --text-display: 2.5rem;
   --text-display--line-height: 3rem;
