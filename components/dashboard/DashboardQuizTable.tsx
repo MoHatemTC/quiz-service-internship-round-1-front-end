@@ -64,7 +64,10 @@ function getStatusClassName(status: QuizStatus) {
   }
 }
 
-function DashboardQuizTable() {
+async function DashboardQuizTable() {
+  const res = await fetch('http://localhost:3000/api/admin/quizzes');
+  const data = await res.json();
+  console.log({ data });
   return (
     <section className="quiz-table-card" aria-label="Quiz table">
       <div className="quiz-table-scroll">
