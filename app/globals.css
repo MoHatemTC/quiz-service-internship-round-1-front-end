@@ -1,13 +1,16 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #0f0f17;
-  --surface: #171725;
-  --card: #1f1f33;
-  --border: #2a2a40;
-  --foreground: #f4f4f5;
-  --foreground-secondary: #a1a1aa;
-  --muted: #71717a;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --divider: #eef1f6;
+  --foreground: #0f172a;
+  --foreground-secondary: #475569;
+  --muted: #94a3b8;
+
+  color-scheme: light;
 }
 
 @theme inline {
@@ -15,30 +18,61 @@
   --color-surface: var(--surface);
   --color-card: var(--card);
   --color-border: var(--border);
+  --color-divider: var(--divider);
   --color-foreground: var(--foreground);
   --color-foreground-secondary: var(--foreground-secondary);
   --color-muted: var(--muted);
 
-  --color-primary-50: #f5f3ff;
-  --color-primary-100: #ede9fe;
-  --color-primary-200: #ddd6fe;
-  --color-primary-300: #c4b5fd;
-  --color-primary-400: #a78bfa;
-  --color-primary-500: #8b5cf6;
-  --color-primary-600: #7c3aed;
-  --color-primary-700: #6d28d9;
-  --color-primary-800: #5b21b6;
-  --color-primary-900: #4c1d95;
+  --color-primary-50: #f4f6fb;
+  --color-primary-100: #e6eaf5;
+  --color-primary-200: #c3ceef;
+  --color-primary-300: #8ea8f0;
+  --color-primary-400: #5d81ea;
+  --color-primary-500: #305ee4;
+  --color-primary-600: #1b48cb;
+  --color-primary-700: #163ba7;
+  --color-primary-800: #112e81;
+  --color-primary-900: #0a2161;
+
+  --color-secondary-50: #f6f6f9;
+  --color-secondary-100: #e9e9f1;
+  --color-secondary-200: #cdcde5;
+  --color-secondary-300: #a4a5da;
+  --color-secondary-400: #7c7dca;
+  --color-secondary-500: #5859bc;
+  --color-secondary-600: #4647ae;
+  --color-secondary-700: #363787;
+  --color-secondary-800: #29296b;
+  --color-secondary-900: #1e1e4e;
+
+  --color-accent-50: #f4f7fa;
+  --color-accent-100: #e6ecf4;
+  --color-accent-200: #c4d5ed;
+  --color-accent-300: #92b7ec;
+  --color-accent-400: #6297e4;
+  --color-accent-500: #4382df;
+  --color-accent-600: #2163c4;
+  --color-accent-700: #1b51a1;
+  --color-accent-800: #133f81;
+  --color-accent-900: #0e2e5d;
+
+  --color-support-50: #f6f8f9;
+  --color-support-100: #eaeff1;
+  --color-support-200: #cfdee3;
+  --color-support-300: #aaccd6;
+  --color-support-400: #83b5c3;
+  --color-support-500: #61a0b3;
+  --color-support-600: #4b899b;
+  --color-support-700: #3d707f;
+  --color-support-800: #2f5965;
+  --color-support-900: #224049;
 
   --color-success: #22c55e;
-  --color-warning: #facc15;
+  --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-info: #38bdf8;
+  --color-info: #4382df;
 
-  --font-sans: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  --font-sans: var(--font-inter);
 
   --text-display: 2.5rem;
   --text-display--line-height: 3rem;
@@ -66,11 +100,16 @@
 
   --text-caption: 0.75rem;
   --text-caption--line-height: 1rem;
-  --text-caption--font-weight: 400;
+  --text-caption--font-weight: 500;
 }
 
 @layer base {
+  html {
+    background: var(--background);
+  }
+
   body {
+    min-height: 100%;
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -84,32 +123,49 @@
   .grid-auto-fit {
     @apply grid grid-cols-[repeat(auto-fit,minmax(min(310px,100%),1fr))];
   }
+
+  .min-w-230 {
+    min-width: 920px;
+  }
+
+  .min-w-70 {
+    min-width: 280px;
+  }
+
+  .max-w-70 {
+    max-width: 280px;
+  }
+
+  .max-w-125 {
+    max-width: 500px;
+  }
 }
 
 @layer components {
-  /* Reusable Card Component */
   .card {
-    @apply bg-card border border-border rounded-2xl p-6 shadow-md transition-all duration-150;
+    @apply rounded-2xl border border-border bg-surface p-6 transition-all duration-150;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 4px 12px rgba(15, 23, 42, 0.06);
   }
 
   .card:hover {
-    @apply shadow-lg;
-    border-color: var(--color-primary-700);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    border-color: var(--color-primary-200);
   }
 
-  /* Stats Card Specific Styles */
   .stats-card {
     @apply flex flex-col;
   }
 
   .stats-card-header {
-    @apply flex items-center mb-4;
+    @apply mb-4 flex items-center;
   }
 
   .stats-card-icon {
-    @apply inline-flex items-center justify-center w-10 h-10 rounded-lg text-lg;
-    background: rgba(139, 92, 246, 0.1);
-    color: var(--color-primary-500);
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full text-lg;
+    background: rgba(67, 130, 223, 0.12);
+    color: var(--color-accent-600);
   }
 
   .stats-card-content {
@@ -117,19 +173,23 @@
   }
 
   .stats-card-label {
-    @apply text-base text-foreground-secondary mb-1;
+    @apply mb-1 text-base text-foreground-secondary;
   }
 
   .stats-card-value {
-    @apply text-4xl font-bold text-foreground leading-none;
+    @apply text-4xl font-bold leading-none text-foreground;
   }
 
   .stats-card-trend {
-    @apply text-sm text-success mt-2;
+    @apply mt-2 text-sm text-success;
   }
 
   .quiz-table-card {
-    @apply overflow-hidden rounded-2xl border border-border bg-card;
+    @apply overflow-hidden border border-border bg-surface;
+    border-radius: 20px;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 4px 12px rgba(15, 23, 42, 0.06);
   }
 
   .quiz-table-scroll {
@@ -141,7 +201,7 @@
   }
 
   .quiz-table thead {
-    @apply border-b border-border text-foreground-secondary;
+    @apply border-b border-divider text-foreground-secondary;
   }
 
   .quiz-table th {
@@ -149,11 +209,11 @@
   }
 
   .quiz-table tbody tr {
-    @apply border-b border-border/70 transition-colors duration-150 last:border-b-0 hover:bg-surface/70;
+    @apply border-b border-divider transition-colors duration-150 last:border-b-0 hover:bg-primary-50;
   }
 
   .quiz-table td {
-    @apply px-8 py-5 align-middle text-primary-100;
+    @apply px-8 py-5 align-middle text-foreground;
   }
 
   .quiz-title-cell {
@@ -165,7 +225,7 @@
   }
 
   .quiz-row-title {
-    @apply block max-w-70 text-body font-medium text-primary-100;
+    @apply block max-w-70 text-body font-medium text-foreground;
   }
 
   .quiz-row-meta {
@@ -173,7 +233,7 @@
   }
 
   .quiz-category-pill {
-    @apply inline-flex rounded-full bg-white/10 px-4 py-1 text-small text-primary-100;
+    @apply inline-flex rounded-full bg-support-100 px-4 py-1 text-small text-support-800;
   }
 
   .quiz-status {
@@ -185,15 +245,15 @@
   }
 
   .quiz-action-button {
-    @apply rounded-lg border border-border bg-surface px-3 py-2 text-caption font-medium text-primary-200 transition-colors duration-150 hover:border-primary-700 hover:bg-primary-800 hover:text-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60;
+    @apply rounded-lg border border-border bg-surface px-3 py-2 text-caption font-medium text-foreground-secondary transition-colors duration-150 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/70;
   }
 
   .quiz-action-button.danger {
-    @apply hover:border-error hover:bg-error/15 hover:text-error;
+    @apply hover:border-error hover:bg-error/10 hover:text-error;
   }
 
   .quiz-table-footer {
-    @apply flex flex-col gap-4 border-t border-border px-8 py-5 text-small text-primary-100 sm:flex-row sm:items-center sm:justify-between;
+    @apply flex flex-col gap-4 border-t border-divider px-8 py-5 text-small text-foreground-secondary sm:flex-row sm:items-center sm:justify-between;
   }
 
   .quiz-table-footer p {
@@ -201,7 +261,7 @@
   }
 
   .quiz-table-footer strong {
-    @apply font-semibold text-primary-100;
+    @apply font-semibold text-foreground;
   }
 
   .quiz-pagination {
@@ -209,10 +269,10 @@
   }
 
   .quiz-pagination button {
-    @apply min-h-10 min-w-10 rounded-lg border border-border bg-surface px-3 text-small font-medium text-primary-200 transition-colors duration-150 hover:border-primary-700 hover:bg-primary-800 hover:text-primary-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60;
+    @apply min-h-10 min-w-10 rounded-lg border border-border bg-surface px-3 text-small font-medium text-foreground-secondary transition-colors duration-150 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/70;
   }
 
   .quiz-pagination button.active {
-    @apply border-primary-300 bg-primary-300 text-primary-900;
+    @apply border-primary-500 bg-primary-500 text-white;
   }
 }

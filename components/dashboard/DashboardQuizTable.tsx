@@ -1,4 +1,4 @@
-import { QuizStatus } from '@/types';
+import { QuizStatus } from '@/types/quiz/admin';
 import QuizCardActions from '../quiz/QuizCardActions';
 
 type QuizTableRow = {
@@ -64,10 +64,7 @@ function getStatusClassName(status: QuizStatus) {
   }
 }
 
-async function DashboardQuizTable() {
-  const res = await fetch('http://localhost:3000/api/admin/quizzes');
-  const data = await res.json();
-  console.log({ data });
+function DashboardQuizTable() {
   return (
     <section className="quiz-table-card" aria-label="Quiz table">
       <div className="quiz-table-scroll">
@@ -120,7 +117,7 @@ async function DashboardQuizTable() {
         </table>
       </div>
 
-      <div className="quiz-table-footer">
+      <div className="quiz-table-footer text-small">
         <p>
           Showing <strong>1 - 4</strong> of <strong>124</strong> quizzes
         </p>

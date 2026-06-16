@@ -13,18 +13,7 @@ export type Quiz = {
   creatorId: string;
 };
 
-export type QuizCardProps = {
-  id: string;
-  title: string;
-  description: string;
-  status: QuizStatus;
-};
-
-export type BadgeProps = {
-  variant: QuizStatus;
-};
-
-export type FilterOption = {
+export type QuizFilterOptions = {
   key: 'all' | QuizStatus;
   label: string;
 };
