@@ -1,12 +1,10 @@
 'use client';
 
+import Link from 'next/link';
+
 function QuizCardActions({ id, title }: { id: string; title: string }) {
   const handlePreview = () => {
     console.log('Preview quiz:', id);
-  };
-
-  const handleEdit = () => {
-    console.log('Edit quiz:', id);
   };
 
   const handleDelete = () => {
@@ -23,14 +21,13 @@ function QuizCardActions({ id, title }: { id: string; title: string }) {
       >
         View
       </button>
-      <button
-        type="button"
+      <Link
+        href={`/admin/dashboard/edit/${id}`}
         className="quiz-action-button"
         aria-label={`Edit ${title}`}
-        onClick={handleEdit}
       >
         Edit
-      </button>
+      </Link>
       <button
         type="button"
         className="quiz-action-button danger"
