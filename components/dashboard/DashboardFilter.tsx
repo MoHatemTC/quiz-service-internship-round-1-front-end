@@ -1,6 +1,7 @@
 'use client';
 
 import { QuizFilterOptions } from '@/types/quiz/admin';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 const FILTERS: QuizFilterOptions[] = [
@@ -11,6 +12,19 @@ const FILTERS: QuizFilterOptions[] = [
 
 function DashboardFilter() {
   const [activeFilter, setActiveFilter] = useState<QuizFilterOptions['key']>('all');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const setFilter = (value: QuizFilterOptions['key']) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === 'all') {
+      params.delete('status');
+    } else {
+      params.set('status', value);
+    }
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="w-full lg:self-end max-w-125">
@@ -35,7 +49,10 @@ function DashboardFilter() {
                   ? 'bg-primary-800 text-white'
                   : 'text-foreground-secondary hover:bg-primary-50 hover:text-primary-800',
               ].join(' ')}
-              onClick={() => setActiveFilter(filter.key)}
+              onClick={() => {
+                setActiveFilter(filter.key);
+                setFilter(filter.key);
+              }}
             >
               {filter.label}
             </button>

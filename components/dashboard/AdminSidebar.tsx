@@ -121,7 +121,7 @@ export default function AdminSidebar() {
   const isQuizzesActive = pathname.startsWith('/admin/dashboard');
 
   return (
-    <aside className="w-full bg-[#071d64] text-white lg:min-h-screen lg:w-64 xl:w-80 lg:sticky lg:rounded-3xl lg:my-8 lg:ml-6 lg:min-w-50">
+    <aside className="w-full bg-[#071d64] text-white lg:min-h-scree lg:w-80 lg:sticky lg:rounded-3xl lg:my-8 lg:ml-6 lg:min-w-50">
       <div className="flex h-full flex-col gap-6 px-4 py-5 lg:px-3">
         <div className="px-2 pt-1">
           <h2 className="text-2xl font-semibold tracking-[-0.03em] text-white">QuizMaster</h2>

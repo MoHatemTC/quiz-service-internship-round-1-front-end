@@ -1,4 +1,4 @@
-import { QuizStatus } from '@/types/quiz/admin';
+import { QuizFilterOptions, QuizStatus } from '@/types/quiz/admin';
 import QuizCardActions from './QuizActions';
 
 type QuizTableRow = {
@@ -97,7 +97,11 @@ function getStatusClassName(status: QuizStatus) {
   }
 }
 
-function DashboardQuizTable() {
+function DashboardQuizTable({ filter }: { filter: string | undefined }) {
+  const filteredQuizzes = QUIZZES.filter((q) => {
+    if (filter === 'all') return true;
+    return q.status === filter;
+  });
   return (
     <section className="quiz-table-card" aria-label="Quiz table">
       <div className="quiz-table-scroll">
@@ -115,7 +119,7 @@ function DashboardQuizTable() {
             </tr>
           </thead>
           <tbody>
-            {QUIZZES.map((quiz) => (
+            {filteredQuizzes.map((quiz) => (
               <tr key={quiz.id}>
                 <td>
                   <div className="quiz-title-cell">
