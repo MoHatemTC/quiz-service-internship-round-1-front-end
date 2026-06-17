@@ -54,6 +54,8 @@ export default async function EditPage({ params }: EditQuizPageProps) {
           startDate={quiz.startDate}
           endDate={quiz.endDate}
         />
+
+        <p>Edit question later...</p>
       </section>
     </main>
   );
