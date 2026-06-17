@@ -1,5 +1,5 @@
 import { QuizStatus } from '@/types/quiz/admin';
-import QuizCardActions from '../quiz/QuizCardActions';
+import QuizCardActions from './QuizActions';
 
 type QuizTableRow = {
   id: string;
