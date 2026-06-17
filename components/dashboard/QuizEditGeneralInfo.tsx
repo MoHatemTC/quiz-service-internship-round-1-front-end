@@ -15,7 +15,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
 
 function QuizEditGeneralInfo({ title, description, startDate, endDate }: QuizEditGeneralInfoProps) {
   return (
-    <Card className="p-0">
+    <Card>
       <form className="flex flex-col">
         <div className="border-b border-divider px-6 py-5">
           <div className="flex items-center gap-3">

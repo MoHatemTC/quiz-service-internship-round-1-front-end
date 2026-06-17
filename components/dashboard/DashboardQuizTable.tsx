@@ -4,6 +4,9 @@ import QuizCardActions from './QuizActions';
 type QuizTableRow = {
   id: string;
   title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
   activity: string;
   category: string;
   questions: number;
@@ -12,10 +15,14 @@ type QuizTableRow = {
   thumbnailClassName: string;
 };
 
-const QUIZZES: QuizTableRow[] = [
+export const QUIZZES: QuizTableRow[] = [
   {
     id: 'advanced-calculus-basics',
     title: 'Advanced Calculus Basics',
+    description:
+      'A focused practice quiz covering differential and integral calculus fundamentals for advanced learners.',
+    startDate: '2026-08-01',
+    endDate: '2026-08-31',
     activity: 'Updated 2 days ago',
     category: 'Mathematics',
     questions: 20,
@@ -26,6 +33,10 @@ const QUIZZES: QuizTableRow[] = [
   {
     id: 'world-war-two-front',
     title: 'World War II: European Front',
+    description:
+      'A historical assessment covering major events, strategies, and turning points of the European theater.',
+    startDate: '2026-07-10',
+    endDate: '2026-07-24',
     activity: 'Created 5 hours ago',
     category: 'History',
     questions: 15,
@@ -36,6 +47,10 @@ const QUIZZES: QuizTableRow[] = [
   {
     id: 'legacy-python-basics',
     title: 'Legacy Python 2.7 Basics',
+    description:
+      'An introductory quiz about Python 2.7 syntax, legacy language features, and maintenance considerations.',
+    startDate: '2026-06-15',
+    endDate: '2026-06-30',
     activity: 'Archived 1 month ago',
     category: 'Technology',
     questions: 10,
@@ -46,12 +61,30 @@ const QUIZZES: QuizTableRow[] = [
   {
     id: 'contemporary-digital-arts',
     title: 'Contemporary Digital Arts',
+    description:
+      'A creative quiz exploring modern digital art tools, trends, and visual storytelling techniques.',
+    startDate: '2026-05-01',
+    endDate: '2026-05-20',
     activity: 'Updated yesterday',
     category: 'Design',
     questions: 25,
     totalPlays: '2,890',
     status: 'PUBLISHED',
     thumbnailClassName: 'from-info via-primary-500 to-success',
+  },
+  {
+    id: 'advanced-thermodynamics-ii',
+    title: 'Advanced Thermodynamics II',
+    description:
+      'An in-depth assessment focusing on the second law of thermodynamics, entropy cycles, and real-world engine efficiency calculations for senior engineering students.',
+    startDate: '2026-09-01',
+    endDate: '2026-09-30',
+    activity: 'Updated 2 hours ago',
+    category: 'Engineering',
+    questions: 24,
+    totalPlays: '1,040',
+    status: 'PUBLISHED',
+    thumbnailClassName: 'from-primary-500 via-info to-background',
   },
 ];
 

@@ -1,37 +1,15 @@
 import Link from 'next/link';
 import QuizEditGeneralInfo from '@/components/dashboard/QuizEditGeneralInfo';
+import { QUIZZES } from '@/components/dashboard/DashboardQuizTable';
 
 type EditQuizPageProps = {
   params: Promise<{ id: string }>;
 };
 
-type MockQuizData = {
-  id: string;
-  title: string;
-  description: string;
-  status: 'PUBLISHED' | 'DRAFT';
-  updatedBy: string;
-  updatedAt: string;
-  startDate: string;
-  endDate: string;
-};
-
-const MOCK_QUIZ_DATA: MockQuizData = {
-  id: 'advanced-thermodynamics-ii',
-  title: 'Advanced Thermodynamics II',
-  description:
-    'An in-depth assessment focusing on the second law of thermodynamics, entropy cycles, and real-world engine efficiency calculations for senior engineering students.',
-  status: 'PUBLISHED',
-  updatedBy: 'Alex Rivera',
-  updatedAt: '2 hours ago',
-  startDate: '09/01/2026',
-  endDate: '09/30/2026',
-};
-
 export default async function EditPage({ params }: EditQuizPageProps) {
   const { id } = await params;
-  const quiz = id === MOCK_QUIZ_DATA.id ? MOCK_QUIZ_DATA : { ...MOCK_QUIZ_DATA, id };
-
+  const quiz = QUIZZES.find((q) => q.id === id);
+  if (!quiz) return null;
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8 lg:px-10">
@@ -51,15 +29,22 @@ export default async function EditPage({ params }: EditQuizPageProps) {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <h1 className="text-h1 text-primary-800">{quiz.title}</h1>
+            {/* <h1 className="text-h1 text-primary-800">{quiz.title}</h1> */}
             <p className="text-body text-foreground-secondary">
-              Last edited by {quiz.updatedBy} - {quiz.updatedAt}
+              Last edited by {'placeholder'} - {'placeholder'}
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 self-start rounded-full bg-success/10 px-3 py-1 text-small font-medium text-success">
-            <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-            {quiz.status === 'PUBLISHED' ? 'Published' : 'Draft'}
+          <div
+            className={`inline-flex items-center gap-2 self-start rounded-full  px-3 py-1 text-small font-medium ${quiz.status === 'DRAFT' ? 'bg-warning/10' : 'bg-success/10'}`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${quiz.status === 'DRAFT' ? 'bg-warning' : 'bg-success'}`}
+              aria-hidden="true"
+            />
+            <p className={`${quiz.status === 'DRAFT' ? 'text-warning' : 'text-success'}`}>
+              {quiz.status === 'PUBLISHED' ? 'Published' : 'Draft'}
+            </p>
           </div>
         </div>
 
