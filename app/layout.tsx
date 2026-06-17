@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './new_globals.css';
+import './globals.css';
 import { Geist, Inter } from 'next/font/google';
 
 const geistSans = Geist({
