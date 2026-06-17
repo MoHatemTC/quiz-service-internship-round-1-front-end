@@ -9,8 +9,6 @@
   --foreground: #0f172a;
   --foreground-secondary: #475569;
   --muted: #94a3b8;
-
-  color-scheme: light;
 }
 
 @theme inline {
