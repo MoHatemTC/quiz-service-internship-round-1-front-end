@@ -28,10 +28,10 @@ export default function QuestionProgress({
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-1.5 w-full overflow-hidden rounded-full bg-border"
+        className="h-2 w-full overflow-hidden rounded-full bg-border"
       >
         <div
-          className="h-full rounded-full bg-primary-500 transition-all duration-250 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-accent-500 to-primary-800 transition-all duration-250 ease-out"
           style={{ width: `${percent}%` }}
         />
       </div>

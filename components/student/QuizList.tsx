@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Quiz } from '@/lib/types/quiz';
+import type { Quiz } from '@/types/quiz/quiz';
 import QuizCard from '@/components/student/QuizCard';
 
 type QuizListProps = {

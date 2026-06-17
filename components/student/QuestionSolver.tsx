@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Question } from '@/lib/types/quiz';
+import type { Question } from '@/types/question/question';
 import QuestionOption from '@/components/student/QuestionOption';
 import QuestionProgress from '@/components/student/QuestionProgress';
 
@@ -67,22 +67,22 @@ export default function QuestionSolver({
   };
 
   const handleQuit = () => {
-    router.push('/student');
+    router.push('/student/quiz-list');
   };
 
   return (
     <div className="flex flex-col gap-8 py-8">
       <header className="flex items-center justify-between">
-        <div>
-          <p className="text-caption uppercase tracking-wide text-muted">
+        <div className="flex flex-col gap-1">
+          <span className="text-caption uppercase tracking-wide text-muted">
             Solving
-          </p>
+          </span>
           <h1 className="text-h2 text-foreground">{quizTitle}</h1>
         </div>
         <button
           type="button"
           onClick={handleQuit}
-          className="inline-flex items-center rounded-xl border border-border bg-surface px-4 py-2 text-small font-semibold text-foreground transition-colors duration-150 ease-out hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+          className="inline-flex items-center rounded-full border border-border bg-surface px-5 py-2 text-small font-semibold text-foreground transition-colors duration-150 ease-out hover:border-accent-200 hover:bg-accent-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
         >
           Quit
         </button>
@@ -94,10 +94,10 @@ export default function QuestionSolver({
         answeredCount={answeredCount}
       />
 
-      <article className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-8 shadow-soft">
+      <article className="flex flex-col gap-6 rounded-[20px] border border-border bg-card p-8 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_12px_rgba(15,23,42,0.06)]">
         <div className="flex flex-col gap-2">
           <span className="text-caption uppercase tracking-wide text-muted">
-            {currentQuestion.type === 'true_false' ? 'True / False' : 'Multiple choice'}
+            {currentQuestion.type === 'TRUE_FALSE' ? 'True / False' : 'Multiple choice'}
           </span>
           <h2 className="text-h2 text-foreground">{currentQuestion.prompt}</h2>
         </div>
@@ -120,7 +120,7 @@ export default function QuestionSolver({
           type="button"
           onClick={handlePrev}
           disabled={isFirst}
-          className="inline-flex items-center rounded-xl border border-border bg-surface px-5 py-2.5 text-body font-semibold text-foreground transition-colors duration-150 ease-out hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center rounded-full border border-border bg-surface px-5 py-2.5 text-body font-semibold text-foreground transition-colors duration-150 ease-out hover:border-accent-200 hover:bg-accent-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           ← Previous
         </button>
@@ -130,7 +130,7 @@ export default function QuestionSolver({
             type="button"
             onClick={handleNext}
             disabled={answeredCount === 0}
-            className="inline-flex items-center rounded-xl bg-success px-5 py-2.5 text-body font-semibold text-white transition-colors duration-150 ease-out hover:bg-success/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center rounded-full bg-success px-6 py-2.5 text-body font-semibold text-inverse transition-colors duration-150 ease-out hover:bg-success/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success disabled:cursor-not-allowed disabled:opacity-50"
           >
             Submit quiz
           </button>
@@ -138,7 +138,7 @@ export default function QuestionSolver({
           <button
             type="button"
             onClick={handleNext}
-            className="inline-flex items-center rounded-xl bg-primary-600 px-5 py-2.5 text-body font-semibold text-white transition-colors duration-150 ease-out hover:bg-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+            className="inline-flex items-center rounded-full bg-accent-500 px-6 py-2.5 text-body font-semibold text-inverse transition-colors duration-150 ease-out hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
           >
             Next →
           </button>

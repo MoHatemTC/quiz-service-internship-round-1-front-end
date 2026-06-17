@@ -1,27 +1,18 @@
 export type QuizStatus = 'open' | 'in_progress' | 'upcoming' | 'closed';
 
-export type QuestionType = 'mcq' | 'true_false';
-
-export type QuestionOption = {
-  id: string;
-  text: string;
-};
-
-export type Question = {
-  id: string;
-  prompt: string;
-  type: QuestionType;
-  options: QuestionOption[];
-};
+export type QuizDifficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 
 export type Quiz = {
   id: string;
   title: string;
   description: string;
+  category: string;
+  difficulty: QuizDifficulty;
   durationMinutes: number;
   questionCount: number;
+  progress: number;
   windowStart: string;
   windowEnd: string;
   status: QuizStatus;
-  questions: Question[];
+  questions: import('@/types/question/question').Question[];
 };

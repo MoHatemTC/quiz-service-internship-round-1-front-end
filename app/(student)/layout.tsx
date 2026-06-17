@@ -1,4 +1,4 @@
-import Container from '@/components/shared/Container';
+import TopNav from '@/components/shared/TopNav';
 
 export default function StudentLayout({
   children,
@@ -7,7 +7,8 @@ export default function StudentLayout({
 }) {
   return (
     <div className="flex min-h-full flex-col">
-      <Container>{children}</Container>
+      <TopNav />
+      <div className="flex-1">{children}</div>
     </div>
   );
 }

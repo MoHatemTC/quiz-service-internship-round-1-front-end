@@ -1,36 +1,65 @@
-import { INTEGRITY_RULES } from '@/lib/mocks/integrity';
+const INTEGRITY_RULES = [
+  {
+    id: 'no-refresh',
+    icon: '🔄',
+    text: 'Do not refresh or close this page. Your progress is saved automatically.',
+    severity: 'warning' as const,
+  },
+  {
+    id: 'no-tab-switch',
+    icon: '🪟',
+    text: 'Do not switch tabs or windows. Tab switching is recorded against your attempt.',
+    severity: 'warning' as const,
+  },
+  {
+    id: 'no-external-help',
+    icon: '👤',
+    text: 'No external help. This is an individual assessment.',
+    severity: 'warning' as const,
+  },
+  {
+    id: 'timer-starts',
+    icon: '⏱',
+    text: 'The timer starts as soon as you click Start and cannot be paused.',
+    severity: 'info' as const,
+  },
+  {
+    id: 'no-retake',
+    icon: '🔒',
+    text: 'You cannot retake the quiz once submitted.',
+    severity: 'info' as const,
+  },
+];
 
 const severityBorder: Record<string, string> = {
-  info: 'border-info',
-  warning: 'border-warning',
-  danger: 'border-error',
+  info: 'border-info/30',
+  warning: 'border-warning/30',
+  danger: 'border-error/30',
 };
 
 const severityIcon: Record<string, string> = {
-  info: 'bg-info/15 text-info',
-  warning: 'bg-warning/15 text-warning',
-  danger: 'bg-error/15 text-error',
+  info: 'bg-info/10 text-info',
+  warning: 'bg-warning/10 text-warning',
+  danger: 'bg-error/10 text-error',
 };
 
 export default function QuizRules() {
   return (
     <section
       aria-labelledby="quiz-rules-heading"
-      className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+      className="flex flex-col gap-4 rounded-[20px] border border-border bg-surface p-5"
     >
       <div>
         <h2 id="quiz-rules-heading" className="text-h3 text-foreground">
           Before you start
         </h2>
-        <p className="text-caption text-muted">
-          Integrity rules for this attempt
-        </p>
+        <p className="text-caption text-muted">Integrity rules for this attempt</p>
       </div>
       <ul className="flex flex-col gap-2">
         {INTEGRITY_RULES.map((rule) => (
           <li
             key={rule.id}
-            className={`flex items-start gap-3 rounded-lg border ${severityBorder[rule.severity]} bg-card px-3 py-2.5 text-small text-foreground`}
+            className={`flex items-start gap-3 rounded-xl border ${severityBorder[rule.severity]} bg-card px-3 py-2.5 text-small text-foreground`}
           >
             <span
               aria-hidden

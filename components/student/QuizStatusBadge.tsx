@@ -1,4 +1,4 @@
-import type { QuizStatus } from '@/lib/types/quiz';
+import type { QuizStatus } from '@/types/quiz/quiz';
 
 type QuizStatusBadgeProps = {
   status: QuizStatus;
@@ -7,19 +7,19 @@ type QuizStatusBadgeProps = {
 const statusConfig: Record<QuizStatus, { label: string; className: string }> = {
   open: {
     label: 'Open',
-    className: 'bg-primary-600 text-white',
+    className: 'bg-success/10 text-success',
   },
   in_progress: {
     label: 'In progress',
-    className: 'bg-info text-white',
+    className: 'bg-info/10 text-info',
   },
   upcoming: {
     label: 'Upcoming',
-    className: 'bg-warning text-foreground',
+    className: 'bg-warning/10 text-warning',
   },
   closed: {
     label: 'Closed',
-    className: 'bg-muted text-foreground-secondary',
+    className: 'bg-muted/15 text-foreground-secondary',
   },
 };
 
