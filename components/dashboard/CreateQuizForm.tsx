@@ -48,6 +48,7 @@ function CreateQuizForm() {
     mode: 'onSubmit',
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const visibility = form.watch('visibilityStatus');
 
   const {
