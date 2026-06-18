@@ -1,4 +1,4 @@
-import { QuizFilterOptions, QuizStatus } from '@/types/quiz/admin';
+import { QuizStatus } from '@/types/quiz/admin';
 import QuizCardActions from './QuizActions';
 
 type QuizTableRow = {

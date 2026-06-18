@@ -140,13 +140,13 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <button
-          type="button"
+        <Link
+          href={`/admin/dashboard/create`}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#5b8dfc] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#4f80f1]"
         >
           <span className="text-lg leading-none">+</span>
           <span>Create New Quiz</span>
-        </button>
+        </Link>
       </div>
     </aside>
   );

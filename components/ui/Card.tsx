@@ -1,10 +1,12 @@
 import React from 'react';
 
+import { cn } from '@/lib/utils';
+
 interface CardProps {
   children: React.ReactNode;
   className?: string;
 }
 
 export default function Card({ children, className = '' }: CardProps) {
-  return <div className={`card ${className}`}>{children}</div>;
+  return <div className={cn('card', className)}>{children}</div>;
 }
