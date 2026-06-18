@@ -38,11 +38,11 @@ type CreateQuizFormInput = z.input<typeof createQuizSchema>;
 type CreateQuizFormValues = z.output<typeof createQuizSchema>;
 
 const DEFAULT_VALUES: CreateQuizFormInput = {
-  title: 'Advanced Calculus Final Examination',
-  description: 'Briefly describe the learning outcomes and scope of this assessment.',
+  title: '',
+  description: '',
   visibilityStatus: 'DRAFT',
   durationMinutes: 60,
-  passingScore: 70,
+  passingScore: 50,
   startDate: '',
   endDate: '',
 };
@@ -141,7 +141,6 @@ function CreateQuizForm() {
                       key={option.key}
                       type="button"
                       onClick={() => {
-                        // setSelectedVisibility(option.key);
                         setValue('visibilityStatus', option.key, { shouldValidate: true });
                       }}
                       className={cn(
