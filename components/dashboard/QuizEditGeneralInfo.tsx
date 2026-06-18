@@ -10,7 +10,11 @@ type QuizEditGeneralInfoProps = {
 };
 
 function FieldLabel({ children }: { children: ReactNode }) {
-  return <span className="text-caption uppercase tracking-[0.12em] text-muted">{children}</span>;
+  return (
+    <span className="text-caption uppercase tracking-[0.12em] text-muted-foreground">
+      {children}
+    </span>
+  );
 }
 
 function QuizEditGeneralInfo({ title, description, startDate, endDate }: QuizEditGeneralInfoProps) {

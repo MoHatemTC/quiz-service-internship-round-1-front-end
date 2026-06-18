@@ -1,8 +1,7 @@
 'use client';
 
 import { QuizFilterOptions } from '@/types/quiz/admin';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const FILTERS: QuizFilterOptions[] = [
   { key: 'all', label: 'All' },
@@ -11,9 +10,13 @@ const FILTERS: QuizFilterOptions[] = [
 ];
 
 function DashboardFilter() {
-  const [activeFilter, setActiveFilter] = useState<QuizFilterOptions['key']>('all');
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const activeFilter = FILTERS.some((filter) => filter.key === statusParam)
+    ? (statusParam as QuizFilterOptions['key'])
+    : 'all';
 
   const setFilter = (value: QuizFilterOptions['key']) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -23,7 +26,10 @@ function DashboardFilter() {
       params.set('status', value);
     }
 
-    router.push(`?${params.toString()}`, { scroll: false });
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
   };
 
   return (
@@ -50,7 +56,6 @@ function DashboardFilter() {
                   : 'text-foreground-secondary hover:bg-primary-50 hover:text-primary-800',
               ].join(' ')}
               onClick={() => {
-                setActiveFilter(filter.key);
                 setFilter(filter.key);
               }}
             >

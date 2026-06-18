@@ -20,7 +20,7 @@ export default async function EditPage({ params }: EditQuizPageProps) {
                 Quizzes
               </Link>
             </li>
-            <li aria-hidden="true" className="text-muted">
+            <li aria-hidden="true" className="text-muted-foreground">
               &gt;
             </li>
             <li className="font-medium text-primary-800">Edit Quiz</li>

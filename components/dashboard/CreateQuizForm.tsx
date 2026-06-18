@@ -76,7 +76,9 @@ function CreateQuizForm() {
 
         <div className="grid gap-5 px-6 py-6">
           <div className="grid gap-2">
-            <Label htmlFor="title">Quiz Title</Label>
+            <Label htmlFor="title" className=" uppercase tracking-[0.12em] ">
+              Quiz Title
+            </Label>
             <Input
               id="title"
               placeholder="e.g. Advanced Calculus Final Examination"

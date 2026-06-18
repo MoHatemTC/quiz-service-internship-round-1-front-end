@@ -97,11 +97,22 @@ function getStatusClassName(status: QuizStatus) {
   }
 }
 
-function DashboardQuizTable({ filter }: { filter: string | undefined }) {
+function DashboardQuizTable({
+  filter,
+  search,
+}: {
+  filter: string | undefined;
+  search: string;
+}) {
+  const normalizedSearch = search.toLowerCase();
   const filteredQuizzes = QUIZZES.filter((q) => {
-    if (filter === 'all') return true;
-    return q.status === filter;
+    const matchesStatus = filter === 'all' ? true : q.status === filter;
+    const matchesSearch =
+      normalizedSearch === '' || q.title.toLowerCase().includes(normalizedSearch);
+
+    return matchesStatus && matchesSearch;
   });
+
   return (
     <section className="quiz-table-card" aria-label="Quiz table">
       <div className="quiz-table-scroll">
@@ -119,44 +130,52 @@ function DashboardQuizTable({ filter }: { filter: string | undefined }) {
             </tr>
           </thead>
           <tbody>
-            {filteredQuizzes.map((quiz) => (
-              <tr key={quiz.id}>
-                <td>
-                  <div className="quiz-title-cell">
-                    <span
-                      className={`quiz-thumbnail bg-linear-to-br ${quiz.thumbnailClassName}`}
-                      aria-hidden="true"
-                    />
-                    <span>
-                      <span className="quiz-row-title">{quiz.title}</span>
-                      <span className="quiz-row-meta">{quiz.activity}</span>
+            {filteredQuizzes.length > 0 ? (
+              filteredQuizzes.map((quiz) => (
+                <tr key={quiz.id}>
+                  <td>
+                    <div className="quiz-title-cell">
+                      <span
+                        className={`quiz-thumbnail bg-linear-to-br ${quiz.thumbnailClassName}`}
+                        aria-hidden="true"
+                      />
+                      <span>
+                        <span className="quiz-row-title">{quiz.title}</span>
+                        <span className="quiz-row-meta">{quiz.activity}</span>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="quiz-category-pill">{quiz.category}</span>
+                  </td>
+                  <td className="text-center">{quiz.questions}</td>
+                  <td>{quiz.totalPlays}</td>
+                  <td>
+                    <span className={`quiz-status ${getStatusClassName(quiz.status)}`}>
+                      {quiz.status}
                     </span>
-                  </div>
-                </td>
-                <td>
-                  <span className="quiz-category-pill">{quiz.category}</span>
-                </td>
-                <td className="text-center">{quiz.questions}</td>
-                <td>{quiz.totalPlays}</td>
-                <td>
-                  <span className={`quiz-status ${getStatusClassName(quiz.status)}`}>
-                    {quiz.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="quiz-table-actions">
-                    <QuizCardActions id={quiz.id} title={quiz.title} />
-                  </div>
+                  </td>
+                  <td>
+                    <div className="quiz-table-actions">
+                      <QuizCardActions id={quiz.id} title={quiz.title} />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-6 py-16 text-center text-small text-muted-foreground">
+                  No quizzes match your current filters.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="quiz-table-footer text-small">
         <p>
-          Showing <strong>1 - 4</strong> of <strong>124</strong> quizzes
+          Showing <strong>{filteredQuizzes.length}</strong> of <strong>{QUIZZES.length}</strong> quizzes
         </p>
         <div className="quiz-pagination" aria-label="Quiz pagination">
           <button type="button" aria-label="Previous page">

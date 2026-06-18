@@ -6,10 +6,7 @@ function Label({ className, ...props }: React.ComponentProps<'label'>) {
   return (
     <label
       data-slot="label"
-      className={cn(
-        'text-caption uppercase tracking-[0.12em] text-muted-foreground',
-        className,
-      )}
+      className={cn('text-caption! uppercase tracking-[0.12em] text-muted-foreground', className)}
       {...props}
     />
   );
