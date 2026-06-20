@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { logout } from '@/lib/api/auth';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type NavItem = {
   label: string;
@@ -69,39 +68,13 @@ function DocumentIcon() {
   );
 }
 
-function LogoutIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
-
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', href: '/student', icon: <HomeIcon /> },
-  { label: 'My Courses', href: '/student/quiz-list', icon: <BookIcon /> },
+  { label: "Dashboard", href: "/student", icon: <HomeIcon /> },
+  { label: "My Courses", href: "/student/quiz-list", icon: <BookIcon /> },
 ];
 
 export default function TopNav() {
   const pathname = usePathname();
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-    }
-  };
 
   return (
     <header className="sticky top-0 z-50 h-16 border-b border-border bg-surface">
@@ -125,8 +98,8 @@ export default function TopNav() {
                 href={item.href}
                 className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-small font-semibold transition-all duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 ${
                   isActive
-                    ? 'bg-gradient-to-b from-accent-500 to-accent-700 text-inverse shadow-[0_1px_2px_rgba(15,23,42,0.08),0_4px_12px_rgba(67,130,223,0.35)]'
-                    : 'text-foreground-secondary hover:bg-divider hover:text-foreground'
+                    ? "bg-gradient-to-b from-accent-500 to-accent-700 text-inverse shadow-[0_1px_2px_rgba(15,23,42,0.08),0_4px_12px_rgba(67,130,223,0.35)]"
+                    : "text-foreground-secondary hover:bg-divider hover:text-foreground"
                 }`}
               >
                 {item.icon}
@@ -197,15 +170,6 @@ export default function TopNav() {
           >
             A
           </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-small font-semibold text-foreground transition-colors duration-150 ease-out hover:border-error/30 hover:bg-error/5 hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
-          >
-            <LogoutIcon />
-            Logout
-          </button>
         </div>
       </div>
     </header>

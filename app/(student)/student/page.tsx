@@ -1,21 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { getQuizzes } from '@/lib/api/student';
-import { getUser } from '@/lib/auth/session';
-import type { QuizDto } from '@/types/quiz/student';
-import Breadcrumb from '@/components/shared/Breadcrumb';
-import Container from '@/components/shared/Container';
-import WelcomeBanner from '@/components/shared/WelcomeBanner';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { getQuizzes } from "@/lib/api/student";
+import { getUser } from "@/lib/auth/session";
+import type { QuizDto } from "@/types/quiz/student";
+import Breadcrumb from "@/components/shared/Breadcrumb";
+import Container from "@/components/shared/Container";
+import WelcomeBanner from "@/components/shared/WelcomeBanner";
 
 export default function StudentDashboardPage() {
   const [quizzes, setQuizzes] = useState<QuizDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userName] = useState(() => {
-    const user = getUser();
-    return user?.email?.split('@')[0] || 'Student';
-  });
+  const user = getUser();
 
   useEffect(() => {
     async function fetchQuizzes() {
@@ -23,7 +20,7 @@ export default function StudentDashboardPage() {
         const data = await getQuizzes();
         setQuizzes(data);
       } catch (err) {
-        console.error('Failed to fetch quizzes:', err);
+        console.error("Failed to fetch quizzes:", err);
       } finally {
         setLoading(false);
       }
@@ -32,20 +29,27 @@ export default function StudentDashboardPage() {
     fetchQuizzes();
   }, []);
 
-  const inProgressQuiz = quizzes.find((q) => q.attemptStatus === 'IN_PROGRESS');
-  const completedCount = quizzes.filter((q) => q.attemptStatus === 'SUBMITTED').length;
+  const inProgressQuiz = quizzes.find((q) => q.attemptStatus === "IN_PROGRESS");
+  const completedCount = quizzes.filter(
+    (q) => q.attemptStatus === "SUBMITTED",
+  ).length;
 
   return (
     <Container size="page">
       <div className="flex flex-col gap-8 py-8">
-        <Breadcrumb items={[{ label: 'PitIQ', href: '/student' }, { label: 'Dashboard' }]} />
+        <Breadcrumb
+          items={[{ label: "PitIQ", href: "/student" }, { label: "Dashboard" }]}
+        />
 
         <WelcomeBanner
-          name={userName}
+          name={user?.email?.split("@")[0] || "Student"}
           subtitle="Pick up where you left off, browse new quizzes, and track your progress."
         />
 
-        <section aria-label="Quick actions" className="flex flex-wrap items-center gap-3">
+        <section
+          aria-label="Quick actions"
+          className="flex flex-wrap items-center gap-3"
+        >
           {inProgressQuiz ? (
             <Link
               href={`/student/quiz/${inProgressQuiz.id}`}
@@ -63,38 +67,66 @@ export default function StudentDashboardPage() {
         </section>
 
         {loading ? (
-          <div className="text-center text-foreground-secondary">Loading quizzes...</div>
+          <div className="text-center text-foreground-secondary">
+            Loading quizzes...
+          </div>
         ) : (
           <>
-            <section aria-label="Stats" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <section
+              aria-label="Stats"
+              className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            >
               <article className="flex flex-col gap-2 rounded-[20px] border border-border bg-card p-5">
-                <span className="text-caption uppercase tracking-wide text-muted">Quizzes</span>
+                <span className="text-caption uppercase tracking-wide text-muted">
+                  Quizzes
+                </span>
                 <p className="text-h1 text-foreground">{quizzes.length}</p>
-                <p className="text-caption text-foreground-secondary">Available</p>
+                <p className="text-caption text-foreground-secondary">
+                  Available
+                </p>
               </article>
               <article className="flex flex-col gap-2 rounded-[20px] border border-border bg-card p-5">
-                <span className="text-caption uppercase tracking-wide text-muted">Completed</span>
+                <span className="text-caption uppercase tracking-wide text-muted">
+                  Completed
+                </span>
                 <p className="text-h1 text-foreground">{completedCount}</p>
-                <p className="text-caption text-foreground-secondary">Submitted</p>
+                <p className="text-caption text-foreground-secondary">
+                  Submitted
+                </p>
               </article>
               <article className="flex flex-col gap-2 rounded-[20px] border border-border bg-card p-5">
-                <span className="text-caption uppercase tracking-wide text-muted">In Progress</span>
+                <span className="text-caption uppercase tracking-wide text-muted">
+                  In Progress
+                </span>
                 <p className="text-h1 text-foreground">
-                  {quizzes.filter((q) => q.attemptStatus === 'IN_PROGRESS').length}
+                  {
+                    quizzes.filter((q) => q.attemptStatus === "IN_PROGRESS")
+                      .length
+                  }
                 </p>
                 <p className="text-caption text-foreground-secondary">Active</p>
               </article>
               <article className="flex flex-col gap-2 rounded-[20px] border border-border bg-card p-5">
-                <span className="text-caption uppercase tracking-wide text-muted">Not Started</span>
+                <span className="text-caption uppercase tracking-wide text-muted">
+                  Not Started
+                </span>
                 <p className="text-h1 text-foreground">
-                  {quizzes.filter((q) => q.attemptStatus === 'NOT_STARTED').length}
+                  {
+                    quizzes.filter((q) => q.attemptStatus === "NOT_STARTED")
+                      .length
+                  }
                 </p>
-                <p className="text-caption text-foreground-secondary">Pending</p>
+                <p className="text-caption text-foreground-secondary">
+                  Pending
+                </p>
               </article>
             </section>
 
             {inProgressQuiz && (
-              <section aria-label="Continue learning" className="flex flex-col gap-3">
+              <section
+                aria-label="Continue learning"
+                className="flex flex-col gap-3"
+              >
                 <div className="flex items-center justify-between">
                   <h2 className="text-h2 text-foreground">Continue learning</h2>
                   <Link
@@ -118,7 +150,9 @@ export default function StudentDashboardPage() {
                       <span className="text-caption uppercase tracking-wide text-muted">
                         In progress
                       </span>
-                      <h3 className="text-h3 text-foreground">{inProgressQuiz.title}</h3>
+                      <h3 className="text-h3 text-foreground">
+                        {inProgressQuiz.title}
+                      </h3>
                     </div>
                     <div className="mt-auto flex items-center justify-between text-caption text-muted">
                       <span>{inProgressQuiz.questionCount} questions</span>

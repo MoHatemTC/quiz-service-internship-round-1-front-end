@@ -1,15 +1,13 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-import { login } from '@/lib/api/auth';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { login } from "@/lib/api/auth";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,10 +18,9 @@ function LoginForm() {
 
     try {
       await login(email, password);
-      const redirectUrl = searchParams.get('redirect') || '/student';
-      router.push(redirectUrl);
+      router.push("/student");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
@@ -52,7 +49,9 @@ function LoginForm() {
             </svg>
           </div>
           <h1 className="text-h1 text-foreground">PitIQ</h1>
-          <p className="mt-2 text-body text-foreground-secondary">Sign in to your account</p>
+          <p className="mt-2 text-body text-foreground-secondary">
+            Sign in to your account
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,7 +62,10 @@ function LoginForm() {
           )}
 
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-small font-medium text-foreground">
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-small font-medium text-foreground"
+            >
               Email
             </label>
             <input
@@ -78,7 +80,10 @@ function LoginForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-small font-medium text-foreground">
+            <label
+              htmlFor="password"
+              className="mb-1.5 block text-small font-medium text-foreground"
+            >
               Password
             </label>
             <input
@@ -97,7 +102,7 @@ function LoginForm() {
             disabled={loading}
             className="w-full rounded-full bg-accent-500 px-6 py-3 text-body font-semibold text-inverse transition-colors duration-150 ease-out hover:bg-accent-600 focus:outline-2 focus:outline-offset-2 focus:outline-accent-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
@@ -106,25 +111,15 @@ function LoginForm() {
             Test Account
           </p>
           <p className="text-small text-foreground-secondary">
-            <span className="font-medium text-foreground">Email:</span> student1@example.com
+            <span className="font-medium text-foreground">Email:</span>{" "}
+            student1@example.com
           </p>
           <p className="text-small text-foreground-secondary">
-            <span className="font-medium text-foreground">Password:</span> password123
+            <span className="font-medium text-foreground">Password:</span>{" "}
+            password123
           </p>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }
