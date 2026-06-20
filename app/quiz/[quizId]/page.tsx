@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getQuiz } from '@/lib/api/student';
-import { startAttempt } from '@/lib/api/attempts';
 import { isAuthenticated } from '@/lib/auth/session';
 import type { QuizInstructionsDto } from '@/types/quiz/student';
 import Container from '@/components/shared/Container';
@@ -20,7 +19,6 @@ export default function QuizLinkPage() {
   const router = useRouter();
   const quizId = params.quizId as string;
   const [state, setState] = useState<QuizState>({ status: 'checking_auth' });
-  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -58,22 +56,14 @@ export default function QuizLinkPage() {
     fetchQuiz();
   }, [quizId, router]);
 
-  const handleStart = async () => {
+  const handleStart = () => {
     if (state.status !== 'ready') return;
-    setStarting(true);
-    try {
-      const attempt = await startAttempt(state.quiz.id);
-      router.push(`/student/quiz/${state.quiz.id}/solve`);
-      // Store attemptId in case we need it
-      void attempt;
-    } catch {
-      setStarting(false);
-    }
+    router.push(`/student/quiz/${state.quiz.id}/solve`);
   };
 
   const handleResume = () => {
     if (state.status !== 'resume') return;
-    router.push(`/student/quiz/${state.quiz.id}/solve`);
+    router.push(`/student/quiz/${state.quiz.id}/solve?attemptId=${state.attemptId}`);
   };
 
   const handleRetry = () => {
@@ -197,10 +187,9 @@ export default function QuizLinkPage() {
                 </p>
                 <button
                   onClick={handleStart}
-                  disabled={starting}
                   className="inline-flex items-center justify-center rounded-full bg-accent-500 px-6 py-3 text-body font-semibold text-inverse transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {starting ? 'Starting...' : 'Start quiz'}
+                  Start quiz
                 </button>
               </>
             )}

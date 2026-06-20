@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearToken } from "@/lib/auth/session";
 
 type NavItem = {
   label: string;
@@ -69,12 +70,18 @@ function DocumentIcon() {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/student", icon: <HomeIcon /> },
-  { label: "My Courses", href: "/student/quiz-list", icon: <BookIcon /> },
+  { label: "Statistics", href: "/student", icon: <HomeIcon /> },
+  { label: "My Quizzes", href: "/student/quiz-list", icon: <BookIcon /> },
 ];
 
 export default function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearToken();
+    router.push("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 h-16 border-b border-border bg-surface">
@@ -170,6 +177,14 @@ export default function TopNav() {
           >
             A
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-small font-semibold text-foreground-secondary transition-colors duration-150 ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </header>
