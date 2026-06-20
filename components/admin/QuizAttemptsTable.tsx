@@ -24,7 +24,10 @@ export default function QuizAttemptsTable({ data, isLoading }: QuizAttemptsTable
     <div className="bg-[#1F1F33] border border-[#2D2D42] rounded-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-[#2D2D42]">
         <h3 className="text-lg font-semibold text-[#F4F4F5]">{data.quizTitle}</h3>
-        <p className="text-sm text-[#A1A1AA] mt-1">{data.attemptCount} attempts</p>
+        <div className="mt-2 flex flex-wrap gap-3 text-sm text-[#A1A1AA]">
+          <span>{data.attemptCount} submitted attempts</span>
+          
+        </div>
       </div>
 
       <div className="overflow-x-auto">

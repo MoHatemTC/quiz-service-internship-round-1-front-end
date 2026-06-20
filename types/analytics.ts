@@ -6,15 +6,17 @@ export interface DashboardSummary {
 }
 
 export interface QuizAttempt {
-  attemptId: number;
+  attemptId: string;
   studentName: string;
   score: number;
   submittedAt: string;
 }
 
 export interface QuizAttemptsResponse {
-  quizId: number;
+  quizId: string;
   quizTitle: string;
   attemptCount: number;
+  completionCount: number;
+  averageScore: number;
   attempts: QuizAttempt[];
 }
