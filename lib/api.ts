@@ -28,3 +28,16 @@ export async function fetchQuizAttempts(quizName: string) {
 
   return response.json();
 }
+
+export async function fetchQuizzes() {
+  const response = await fetch(`${API_BASE_URL}/admin/quizzes`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch quizzes: ${response.statusText}`);
+  }
+
+  return response.json();
+}

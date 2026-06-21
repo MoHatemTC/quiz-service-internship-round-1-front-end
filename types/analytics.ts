@@ -18,5 +18,19 @@ export interface QuizAttemptsResponse {
   attemptCount: number;
   completionCount: number;
   averageScore: number;
+  statusBreakdown: {
+    notStarted: number;
+    inProgress: number;
+    submitted: number;
+  };
   attempts: QuizAttempt[];
+  studentScores: {
+    studentId: string;
+    studentName: string;
+    status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED';
+    score: number | null;
+    attemptId: string | null;
+    startedAt: string | null;
+    submittedAt: string | null;
+  }[];
 }
