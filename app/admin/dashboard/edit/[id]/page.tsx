@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { QUIZZES } from '@/components/admin/dashboard/DashboardQuizTable';
-import EditQuizForm from '@/components/admin/dashboard/EditQuizForm';
+import EditQuizForm from '@/components/admin/dashboard/forms/EditQuizForm';
 
 type EditQuizPageProps = {
   params: Promise<{ id: string }>;

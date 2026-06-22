@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
+import SectionTitle from './FormSectionTitle';
+import FormLabel from './FormLabel';
 
 const DEFAULT_VALUES: CreateQuizFormInput = {
   title: '',
@@ -21,20 +23,6 @@ const DEFAULT_VALUES: CreateQuizFormInput = {
   startDate: '',
   endDate: '',
 };
-
-function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span
-        className="grid h-7 w-7 place-items-center rounded-full bg-primary-50 text-primary-700"
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
-      <h2 className="text-h3 text-primary-800">{title}</h2>
-    </div>
-  );
-}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -69,16 +57,14 @@ function CreateQuizForm() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6">
-      <Card className="overflow-hidden">
+      <Card>
         <div className="border-b border-divider px-6 py-5">
           <SectionTitle icon={<BookCopy className="h-4 w-4" />} title="Quiz Identity" />
         </div>
 
         <div className="grid gap-5 px-6 py-6">
           <div className="grid gap-2">
-            <Label htmlFor="title" className=" uppercase tracking-[0.12em] ">
-              Quiz Title
-            </Label>
+            <FormLabel htmlFor="title" label="Quiz title" />
             <Input
               id="title"
               placeholder="e.g. Advanced Calculus Final Examination"
@@ -89,7 +75,7 @@ function CreateQuizForm() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
+            <FormLabel htmlFor="description" label="Description" />
             <Textarea
               id="description"
               placeholder="Briefly describe the learning outcomes and scope of this assessment..."
@@ -101,14 +87,14 @@ function CreateQuizForm() {
         </div>
       </Card>
 
-      <Card className="overflow-hidden">
+      <Card>
         <div className="border-b border-divider px-6 py-5">
           <SectionTitle icon={<Settings2 className="h-4 w-4" />} title="Configuration" />
         </div>
 
         <div className="grid gap-6 px-6 py-6">
           <div className="grid gap-2">
-            <Label>Visibility Status</Label>
+            <FormLabel label="Visibility Status" />
             <div className="rounded-2xl border border-border bg-surface p-1">
               <div className="grid grid-cols-2 gap-1">
                 {statusOptions.map((option) => {
@@ -139,7 +125,7 @@ function CreateQuizForm() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="durationMinutes">Duration (min)</Label>
+              <FormLabel htmlFor="durationMinutes" label="Duration (min)" />
               <Input
                 id="durationMinutes"
                 type="number"
@@ -153,7 +139,7 @@ function CreateQuizForm() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="passingScore">Passing Score (%)</Label>
+              <FormLabel htmlFor="passingScore" label="Passing Score (%)" />
               <Input
                 id="passingScore"
                 type="number"
@@ -170,7 +156,7 @@ function CreateQuizForm() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="startDate">Starts At</Label>
+              <FormLabel htmlFor="startDate" label="Starts At" />
               <Input
                 id="startDate"
                 type="date"
@@ -181,7 +167,7 @@ function CreateQuizForm() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="endDate">Ends At</Label>
+              <FormLabel htmlFor="endDate" label="Ends At" />
               <Input
                 id="endDate"
                 type="date"
