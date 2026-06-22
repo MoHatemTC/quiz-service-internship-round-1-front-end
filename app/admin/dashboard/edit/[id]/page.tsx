@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import QuizEditGeneralInfo from '@/components/dashboard/QuizEditGeneralInfo';
-import { QUIZZES } from '@/components/dashboard/DashboardQuizTable';
+import { QUIZZES } from '@/components/admin/dashboard/DashboardQuizTable';
+import EditQuizForm from '@/components/admin/dashboard/EditQuizForm';
 
 type EditQuizPageProps = {
   params: Promise<{ id: string }>;
@@ -48,9 +48,12 @@ export default async function EditPage({ params }: EditQuizPageProps) {
           </div>
         </div>
 
-        <QuizEditGeneralInfo
+        <EditQuizForm
           title={quiz.title}
           description={quiz.description}
+          visibilityStatus={quiz.status}
+          durationMinutes={quiz.durationMinutes}
+          passingScore={quiz.passingScore}
           startDate={quiz.startDate}
           endDate={quiz.endDate}
         />

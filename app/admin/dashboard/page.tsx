@@ -1,8 +1,8 @@
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardFilter from '@/components/dashboard/DashboardFilter';
-import DashboardSearch from '@/components/dashboard/DashboardSearch';
-import StatsCard from '@/components/dashboard/StatsCard';
-import DashboardQuizTable from '@/components/dashboard/DashboardQuizTable';
+import DashboardHeader from '@/components/admin/dashboard/DashboardHeader';
+import DashboardFilter from '@/components/admin/dashboard/DashboardFilter';
+import DashboardSearch from '@/components/admin/dashboard/DashboardSearch';
+import StatsCard from '@/components/admin/dashboard/StatsCard';
+import DashboardQuizTable from '@/components/admin/dashboard/DashboardQuizTable';
 import { DASHBOARD_STATS } from '@/constants';
 import { searchParamsProps } from '@/types';
 

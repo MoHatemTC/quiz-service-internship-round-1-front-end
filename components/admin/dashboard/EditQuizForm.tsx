@@ -12,15 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
 
-const DEFAULT_VALUES: CreateQuizFormInput = {
-  title: '',
-  description: '',
-  visibilityStatus: 'DRAFT',
-  durationMinutes: 60,
-  passingScore: 50,
-  startDate: '',
-  endDate: '',
-};
+type EditQuizFormProps = CreateQuizFormInput;
 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
@@ -41,10 +33,10 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-small text-error">{message}</p>;
 }
 
-function CreateQuizForm() {
+function EditQuizForm(defaultValues: EditQuizFormProps) {
   const form = useForm<CreateQuizFormInput, undefined, CreateQuizFormValues>({
     resolver: zodResolver(createQuizSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues,
     mode: 'onSubmit',
   });
 
@@ -64,19 +56,19 @@ function CreateQuizForm() {
   ] as const;
 
   const onSubmit = handleSubmit((values) => {
-    console.log('Create quiz payload:', values);
+    console.log('Edit quiz payload:', values);
   });
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6">
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden">
         <div className="border-b border-divider px-6 py-5">
           <SectionTitle icon={<BookCopy className="h-4 w-4" />} title="Quiz Identity" />
         </div>
 
         <div className="grid gap-5 px-6 py-6">
           <div className="grid gap-2">
-            <Label htmlFor="title" className=" uppercase tracking-[0.12em] ">
+            <Label htmlFor="title" className="uppercase tracking-[0.12em]">
               Quiz Title
             </Label>
             <Input
@@ -101,7 +93,7 @@ function CreateQuizForm() {
         </div>
       </Card>
 
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden">
         <div className="border-b border-divider px-6 py-5">
           <SectionTitle icon={<Settings2 className="h-4 w-4" />} title="Configuration" />
         </div>
@@ -194,7 +186,7 @@ function CreateQuizForm() {
         </div>
       </Card>
 
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden">
         <div className="border-b border-divider px-6 py-5">
           <div className="flex items-center justify-between gap-4">
             <SectionTitle icon={<CircleDashed className="h-4 w-4" />} title="Questions" />
@@ -243,11 +235,11 @@ function CreateQuizForm() {
           className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700"
           disabled={isSubmitting}
         >
-          Save Quiz
+          Save Changes
         </Button>
       </div>
     </form>
   );
 }
 
-export default CreateQuizForm;
+export default EditQuizForm;

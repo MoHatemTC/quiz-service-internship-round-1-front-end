@@ -7,6 +7,8 @@ type QuizTableRow = {
   description: string;
   startDate: string;
   endDate: string;
+  durationMinutes: number;
+  passingScore: number;
   activity: string;
   category: string;
   questions: number;
@@ -23,6 +25,8 @@ export const QUIZZES: QuizTableRow[] = [
       'A focused practice quiz covering differential and integral calculus fundamentals for advanced learners.',
     startDate: '2026-08-01',
     endDate: '2026-08-31',
+    durationMinutes: 60,
+    passingScore: 70,
     activity: 'Updated 2 days ago',
     category: 'Mathematics',
     questions: 20,
@@ -37,6 +41,8 @@ export const QUIZZES: QuizTableRow[] = [
       'A historical assessment covering major events, strategies, and turning points of the European theater.',
     startDate: '2026-07-10',
     endDate: '2026-07-24',
+    durationMinutes: 45,
+    passingScore: 60,
     activity: 'Created 5 hours ago',
     category: 'History',
     questions: 15,
@@ -51,6 +57,8 @@ export const QUIZZES: QuizTableRow[] = [
       'An introductory quiz about Python 2.7 syntax, legacy language features, and maintenance considerations.',
     startDate: '2026-06-15',
     endDate: '2026-06-30',
+    durationMinutes: 30,
+    passingScore: 50,
     activity: 'Archived 1 month ago',
     category: 'Technology',
     questions: 10,
@@ -65,6 +73,8 @@ export const QUIZZES: QuizTableRow[] = [
       'A creative quiz exploring modern digital art tools, trends, and visual storytelling techniques.',
     startDate: '2026-05-01',
     endDate: '2026-05-20',
+    durationMinutes: 90,
+    passingScore: 75,
     activity: 'Updated yesterday',
     category: 'Design',
     questions: 25,
@@ -79,6 +89,8 @@ export const QUIZZES: QuizTableRow[] = [
       'An in-depth assessment focusing on the second law of thermodynamics, entropy cycles, and real-world engine efficiency calculations for senior engineering students.',
     startDate: '2026-09-01',
     endDate: '2026-09-30',
+    durationMinutes: 120,
+    passingScore: 80,
     activity: 'Updated 2 hours ago',
     category: 'Engineering',
     questions: 24,
