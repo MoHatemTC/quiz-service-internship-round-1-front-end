@@ -5,12 +5,18 @@ export const QUIZ_STATUS = {
 
 export type QuizStatus = (typeof QUIZ_STATUS)[keyof typeof QUIZ_STATUS];
 
-export type Quiz = {
+export type QuizData = {
   id: string;
   title: string;
   description: string;
-  status: QuizStatus;
-  creatorId: string;
+  status: 'DRAFT' | 'PUBLISHED';
+  durationMinutes: number;
+  passingScore: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type QuizFilterOptions = {
