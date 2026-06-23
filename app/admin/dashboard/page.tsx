@@ -5,7 +5,7 @@ import StatsCard from '@/components/admin/dashboard/StatsCard';
 import DashboardQuizTable from '@/components/admin/dashboard/DashboardQuizTable';
 import { DASHBOARD_STATS } from '@/constants';
 import { searchParamsProps } from '@/types';
-import { da } from 'zod/locales';
+import { getAdminQuizzes } from '@/lib/api/admin/quizzes';
 
 const VALID_FILTERS = ['all', 'PUBLISHED', 'DRAFT'] as const;
 type QuizFilter = (typeof VALID_FILTERS)[number];
@@ -28,8 +28,7 @@ async function Dashboard({ searchParams }: searchParamsProps) {
   const params = await searchParams;
   const statusFilter = parseFilter(params.status);
   const searchTerm = parseSearch(params.search);
-  const res = await fetch('http://localhost:3002/api/admin/quizzes');
-  const quizzesData = await res.json();
+  const quizzesData = await getAdminQuizzes();
 
   return (
     <main className="min-h-screen bg-background text-foreground">
