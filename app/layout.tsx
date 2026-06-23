@@ -8,9 +8,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: 'QnA Service',
-  description:
-    'The QnA Service is a web-based assessment platform that enables administrators to create, manage, and analyze quizzes for learners',
+  title: 'PitIQ',
+  description: 'PitIQ is a professional educational assessment platform. Pause. Assess. Advance.',
 };
 
 export default function RootLayout({
