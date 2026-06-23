@@ -12,8 +12,8 @@ export type QuizData = {
   status: 'DRAFT' | 'PUBLISHED';
   durationMinutes: number;
   passingScore: number;
-  startsAt: string | null;
-  endsAt: string | null;
+  startsAt: string;
+  endsAt: string;
   createdById: string;
   createdAt: string;
   updatedAt: string;

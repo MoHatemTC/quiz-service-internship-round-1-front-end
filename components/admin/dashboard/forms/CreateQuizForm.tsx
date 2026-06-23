@@ -11,8 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
+import { createAdminQuiz } from '@/lib/api/admin/quizzes';
 import SectionTitle from './FormSectionTitle';
 import FormLabel from './FormLabel';
+import FieldError from './FormFieldError';
+import { useRouter } from 'next/navigation';
 
 const DEFAULT_VALUES: CreateQuizFormInput = {
   title: '',
@@ -24,12 +27,8 @@ const DEFAULT_VALUES: CreateQuizFormInput = {
   endDate: '',
 };
 
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-small text-error">{message}</p>;
-}
-
 function CreateQuizForm() {
+  const router = useRouter();
   const form = useForm<CreateQuizFormInput, undefined, CreateQuizFormValues>({
     resolver: zodResolver(createQuizSchema),
     defaultValues: DEFAULT_VALUES,
@@ -51,8 +50,9 @@ function CreateQuizForm() {
     { key: 'PUBLISHED', label: 'Published' },
   ] as const;
 
-  const onSubmit = handleSubmit((values) => {
-    console.log('Create quiz payload:', values);
+  const onSubmit = handleSubmit(async (values) => {
+    await createAdminQuiz(values);
+    router.push('/admin/dashboard');
   });
 
   return (
@@ -226,7 +226,7 @@ function CreateQuizForm() {
       <div className="flex justify-end pt-2">
         <Button
           type="submit"
-          className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700"
+          className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700 disabled:bg-primary-400"
           disabled={isSubmitting}
         >
           Save Quiz

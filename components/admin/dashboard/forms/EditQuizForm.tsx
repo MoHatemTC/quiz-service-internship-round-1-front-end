@@ -11,12 +11,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
+import { updateAdminQuiz } from '@/lib/api/admin/quizzes';
 import SectionTitle from './FormSectionTitle';
 import FieldError from './FormFieldError';
+import { useRouter } from 'next/navigation';
 
-type EditQuizFormProps = CreateQuizFormInput;
+type EditQuizFormProps = CreateQuizFormInput & { id: string };
 
-function EditQuizForm(defaultValues: EditQuizFormProps) {
+function EditQuizForm({ id, ...defaultValues }: EditQuizFormProps) {
+  const router = useRouter();
+
   const form = useForm<CreateQuizFormInput, undefined, CreateQuizFormValues>({
     resolver: zodResolver(createQuizSchema),
     defaultValues,
@@ -38,8 +42,9 @@ function EditQuizForm(defaultValues: EditQuizFormProps) {
     { key: 'PUBLISHED', label: 'Published' },
   ] as const;
 
-  const onSubmit = handleSubmit((values) => {
-    console.log('Edit quiz payload:', values);
+  const onSubmit = handleSubmit(async (values) => {
+    await updateAdminQuiz(id, values);
+    router.push('/admin/dashboard');
   });
 
   return (

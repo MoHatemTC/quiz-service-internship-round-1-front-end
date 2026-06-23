@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { QUIZZES } from '@/components/admin/dashboard/DashboardQuizTable';
 import EditQuizForm from '@/components/admin/dashboard/forms/EditQuizForm';
+import { getAdminQuizById } from '@/lib/api/admin/quizzes';
 
 type EditQuizPageProps = {
   params: Promise<{ id: string }>;
@@ -8,8 +8,10 @@ type EditQuizPageProps = {
 
 export default async function EditPage({ params }: EditQuizPageProps) {
   const { id } = await params;
-  const quiz = QUIZZES.find((q) => q.id === id);
+  const quiz = await getAdminQuizById(id);
+
   if (!quiz) return null;
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8 lg:px-10">
@@ -29,9 +31,9 @@ export default async function EditPage({ params }: EditQuizPageProps) {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            {/* <h1 className="text-h1 text-primary-800">{quiz.title}</h1> */}
-            <p className="text-body text-foreground-secondary">
-              Last edited by {'placeholder'} - {'placeholder'}
+            <h1 className="text-h1 text-primary-800">{quiz.title}</h1>
+            <p className="text-caption text-foreground-secondary">
+              Last edited on {new Date(quiz.updatedAt).toLocaleDateString()}
             </p>
           </div>
 
@@ -49,13 +51,14 @@ export default async function EditPage({ params }: EditQuizPageProps) {
         </div>
 
         <EditQuizForm
+          id={id}
           title={quiz.title}
           description={quiz.description}
           visibilityStatus={quiz.status}
           durationMinutes={quiz.durationMinutes}
           passingScore={quiz.passingScore}
-          startDate={quiz.startDate}
-          endDate={quiz.endDate}
+          startDate={quiz.startsAt?.slice(0, 10) ?? ''}
+          endDate={quiz.endsAt?.slice(0, 10) ?? ''}
         />
 
         <p>Edit question later...</p>
