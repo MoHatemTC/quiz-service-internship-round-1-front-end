@@ -1,13 +1,14 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Server-side: hit the backend directly. Browser: use relative path so Next.js rewrites proxy it.
+const API_BASE_URL =
+  typeof window === 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'
+    : '';
 
 type FetchOptions = RequestInit & {
   requireAuth?: boolean;
 };
 
-export async function apiFetch<T>(
-  path: string,
-  options: FetchOptions = {},
-): Promise<T> {
+export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { requireAuth = true, ...fetchOptions } = options;
 
   const headers: HeadersInit = {

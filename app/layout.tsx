@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist",
-  subsets: ["latin"],
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "PitIQ",
-  description:
-    "PitIQ is a professional educational assessment platform. Pause. Assess. Advance.",
+  title: 'PitIQ',
+  description: 'PitIQ is a professional educational assessment platform. Pause. Assess. Advance.',
 };
 
 export default function RootLayout({
@@ -19,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
+      <body>{children}</body>
     </html>
   );
 }
