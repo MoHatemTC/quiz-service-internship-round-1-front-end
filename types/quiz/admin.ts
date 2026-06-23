@@ -1,6 +1,6 @@
 export const QUIZ_STATUS = {
-  PUBLISHED: 'PUBLISHED',
-  DRAFT: 'DRAFT',
+  PUBLISHED: "PUBLISHED",
+  DRAFT: "DRAFT",
 } as const;
 
 export type QuizStatus = (typeof QUIZ_STATUS)[keyof typeof QUIZ_STATUS];
@@ -14,6 +14,6 @@ export type Quiz = {
 };
 
 export type QuizFilterOptions = {
-  key: 'all' | QuizStatus;
+  key: "all" | QuizStatus;
   label: string;
 };
