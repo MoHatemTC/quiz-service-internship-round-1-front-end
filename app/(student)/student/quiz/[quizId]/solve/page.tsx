@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { startAttempt, saveAnswers, submitAttempt } from '@/lib/api/attempts';
-import { getQuestions } from '@/lib/api/student';
-import type { QuestionDto } from '@/types/question/question';
+import {
+  getAttemptQuestions,
+  saveAnswers,
+  startAttempt,
+  submitAttempt,
+} from '@/lib/api/student';
 import Container from '@/components/shared/Container';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -15,121 +18,179 @@ function toUuidOrNull(value: string | null | undefined): string | null {
   return UUID_RE.test(trimmed) ? trimmed : null;
 }
 
+function formatTime(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const m = Math.floor(safe / 60);
+  const s = safe % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+type Phase = 'init' | 'loading' | 'ready' | 'submitting' | 'error';
+
 export default function QuizSolvePage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = params.quizId as string;
   const initialAttemptId = toUuidOrNull(searchParams.get('attemptId'));
-  const initializedRef = useRef(false);
 
+  const [phase, setPhase] = useState<Phase>('init');
   const [attemptId, setAttemptId] = useState<string | null>(initialAttemptId);
-  const [questions, setQuestions] = useState<QuestionDto[]>([]);
+  const [questions, setQuestions] = useState<
+    Array<{ id: string; type: 'MCQ' | 'TRUE_FALSE'; text: string; options: string[]; order: number }>
+  >([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | null>>({});
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [errorTitle, setErrorTitle] = useState<string>('Failed to load quiz');
+
+  const attemptIdRef = useRef<string | null>(initialAttemptId);
+  const answersRef = useRef<Record<string, string | null>>({});
+  const submittedRef = useRef(false);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    if (initRef.current) return;
+    initRef.current = true;
 
-    async function startQuiz() {
+    async function init() {
+      setPhase('loading');
       try {
-        const [questionsData, attemptData] = await Promise.all([
-          getQuestions(quizId),
-          initialAttemptId ? Promise.resolve(null) : startAttempt(quizId),
-        ]);
-        setQuestions(questionsData);
-
-        if (attemptData) {
-          const id = toUuidOrNull(attemptData.id);
+        let id = initialAttemptId;
+        if (!id) {
+          const attempt = await startAttempt(quizId);
+          id = toUuidOrNull(attempt.id);
           if (!id) {
             throw new Error('Attempt id missing from server response.');
           }
-          setAttemptId(id);
+        }
+        attemptIdRef.current = id;
+        setAttemptId(id);
+
+        const data = await getAttemptQuestions(id);
+        setQuestions(
+          [...data.questions].sort((a, b) => a.order - b.order),
+        );
+        setSecondsLeft(data.remainingSeconds);
+        setPhase('ready');
+
+        if (!initialAttemptId) {
           router.replace(`/student/quiz/${quizId}/solve?attemptId=${id}`);
         }
       } catch (err) {
         console.error('Failed to start attempt:', err);
         setError(err instanceof Error ? err.message : 'Failed to start attempt.');
-      } finally {
-        setLoading(false);
+        setPhase('error');
       }
     }
 
-    startQuiz();
+    init();
   }, [quizId, initialAttemptId, router]);
 
-  // Auto-save answers (debounced)
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  const doSubmit = useCallback(
+    async (id: string) => {
+      if (submittedRef.current) return;
+      submittedRef.current = true;
+      setPhase('submitting');
+      try {
+        const answersArray = Object.entries(answersRef.current).map(
+          ([questionId, selectedOptionId]) => ({
+            questionId,
+            selectedOptionId,
+          }),
+        );
+        await submitAttempt(id, answersArray);
+        router.replace(`/student/quiz/result/${id}`);
+      } catch (err) {
+        console.error('Failed to submit:', err);
+        submittedRef.current = false;
+        setPhase('ready');
+        setError(err instanceof Error ? err.message : 'Failed to submit attempt.');
+        setErrorTitle('Submission failed');
+      }
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    if (phase !== 'ready') return;
+    if (secondsLeft <= 0) {
+      const id = attemptIdRef.current;
+      if (id) {
+        doSubmit(id);
+      }
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSecondsLeft((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft, phase, doSubmit]);
+
   useEffect(() => {
     if (!attemptId || Object.keys(answers).length === 0) return;
 
     const timer = setTimeout(async () => {
       try {
-        const answersArray = Object.entries(answers).map(([questionId, selectedOptionId]) => ({
-          questionId,
-          selectedOptionId,
-        }));
+        const answersArray = Object.entries(answers).map(
+          ([questionId, selectedOptionId]) => ({
+            questionId,
+            selectedOptionId,
+          }),
+        );
         await saveAnswers(attemptId, answersArray);
       } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg.includes('409')) {
+          const id = attemptIdRef.current;
+          if (id) {
+            router.replace(`/student/quiz/result/${id}`);
+          }
+          return;
+        }
         console.error('Failed to save answers:', err);
       }
-    }, 1000);
+    }, 800);
 
     return () => clearTimeout(timer);
-  }, [answers, attemptId]);
+  }, [answers, attemptId, router]);
 
   const handleSelect = (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
-  const handleSubmit = async () => {
-    const id = toUuidOrNull(attemptId);
-    if (!id) {
-      setError('Cannot submit: attempt id is not ready yet.');
-      return;
-    }
-
-    setSubmitting(true);
-    setError(null);
-    try {
-      const answersArray = Object.entries(answers).map(([questionId, selectedOptionId]) => ({
-        questionId,
-        selectedOptionId,
-      }));
-      await submitAttempt(id, answersArray);
-      router.push(`/student/quiz/result/${id}`);
-    } catch (err) {
-      console.error('Failed to submit:', err);
-      setError(err instanceof Error ? err.message : 'Failed to submit attempt.');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSubmit = () => {
+    const id = attemptIdRef.current;
+    if (!id || submittedRef.current) return;
+    doSubmit(id);
   };
 
-  if (loading) {
+  if (phase === 'init' || phase === 'loading') {
     return (
       <Container size="quiz">
-        <div className="py-16 text-center text-foreground-secondary">Starting quiz...</div>
+        <div className="py-16 text-center text-foreground-secondary">
+          Starting quiz...
+        </div>
       </Container>
     );
   }
 
-  if (!attemptId || questions.length === 0) {
+  if (phase === 'error' || !attemptId || questions.length === 0) {
     return (
       <Container size="quiz">
         <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <h1 className="text-h1 text-foreground">Failed to load quiz</h1>
-          {error && (
-            <p className="max-w-md text-body text-error">{error}</p>
-          )}
+          <h1 className="text-h1 text-foreground">{errorTitle}</h1>
+          {error && <p className="max-w-md text-body text-error">{error}</p>}
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/student/quiz-list')}
             className="mt-4 inline-block rounded-full bg-accent-500 px-6 py-3 text-body font-semibold text-inverse hover:bg-accent-600"
           >
-            Go back
+            Back to quiz list
           </button>
         </div>
       </Container>
@@ -137,22 +198,53 @@ export default function QuizSolvePage() {
   }
 
   const currentQuestion = questions[currentIndex];
-  const canSubmit = toUuidOrNull(attemptId) !== null && !submitting;
+  const lowTime = secondsLeft <= 60;
+  const submitting = phase === 'submitting';
 
   return (
     <Container size="quiz">
       <div className="flex flex-col gap-6 py-8">
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-caption uppercase tracking-wide text-muted">Solving</p>
+            <p className="text-caption uppercase tracking-wide text-muted">
+              Solving
+            </p>
             <h1 className="text-h2 text-foreground">Quiz Attempt</h1>
           </div>
-          <button
-            onClick={() => router.push('/student/quiz-list')}
-            className="rounded-full border border-border bg-surface px-4 py-2 text-small font-semibold text-foreground hover:bg-accent-50"
-          >
-            Quit
-          </button>
+          <div className="flex items-center gap-3">
+            <span
+              className={`inline-flex items-center rounded-full px-4 py-2 text-small font-semibold tabular-nums ${
+                lowTime
+                  ? 'bg-error/10 text-error'
+                  : 'bg-accent-50 text-accent-700'
+              }`}
+              aria-label="Time remaining"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2"
+                aria-hidden
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              {formatTime(secondsLeft)}
+            </span>
+            <button
+              onClick={() => router.push('/student/quiz-list')}
+              className="rounded-full border border-border bg-surface px-4 py-2 text-small font-semibold text-foreground hover:bg-accent-50"
+            >
+              Quit
+            </button>
+          </div>
         </header>
 
         <div className="rounded-[20px] border border-border bg-card p-8">
@@ -180,7 +272,8 @@ export default function QuizSolvePage() {
                 <button
                   key={optionId}
                   onClick={() => handleSelect(currentQuestion.id, optionId)}
-                  className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
+                  disabled={submitting}
+                  className={`w-full rounded-xl border px-4 py-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
                     isSelected
                       ? 'border-2 border-accent-500 bg-accent-50'
                       : 'border border-border bg-surface hover:border-accent-200 hover:bg-accent-50'
@@ -198,7 +291,7 @@ export default function QuizSolvePage() {
           <div className="mt-8 flex items-center justify-between border-t border-divider pt-6">
             <button
               onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-              disabled={currentIndex === 0}
+              disabled={currentIndex === 0 || submitting}
               className="rounded-full border border-border bg-surface px-5 py-2.5 text-body font-semibold text-foreground hover:bg-accent-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               ← Previous
@@ -207,15 +300,18 @@ export default function QuizSolvePage() {
             {currentIndex === questions.length - 1 ? (
               <button
                 onClick={handleSubmit}
-                disabled={!canSubmit}
+                disabled={submitting}
                 className="rounded-full bg-success px-6 py-2.5 text-body font-semibold text-inverse hover:bg-success/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? 'Submitting...' : 'Submit quiz'}
               </button>
             ) : (
               <button
-                onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
-                className="rounded-full bg-accent-500 px-6 py-2.5 text-body font-semibold text-inverse hover:bg-accent-600"
+                onClick={() =>
+                  setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))
+                }
+                disabled={submitting}
+                className="rounded-full bg-accent-500 px-6 py-2.5 text-body font-semibold text-inverse hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Next →
               </button>

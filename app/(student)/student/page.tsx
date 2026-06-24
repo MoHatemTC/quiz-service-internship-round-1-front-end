@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getQuizzes } from "@/lib/api/student";
+import { getActiveAttempt, getQuizzes } from "@/lib/api/student";
 import { getUser } from "@/lib/auth/session";
 import type { QuizDto } from "@/types/quiz/student";
 import Breadcrumb from "@/components/shared/Breadcrumb";
@@ -12,6 +12,8 @@ import WelcomeBanner from "@/components/shared/WelcomeBanner";
 export default function StudentDashboardPage() {
   const [quizzes, setQuizzes] = useState<QuizDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeAttemptId, setActiveAttemptId] = useState<string | null>(null);
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const user = getUser();
 
   useEffect(() => {
@@ -26,13 +28,36 @@ export default function StudentDashboardPage() {
       }
     }
 
+    async function fetchActive() {
+      try {
+        const data = await getActiveAttempt();
+        if (data.attempt) {
+          setActiveAttemptId(data.attempt.attemptId);
+          setActiveQuizId(data.attempt.quizId);
+        } else {
+          setActiveAttemptId(null);
+          setActiveQuizId(null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch active attempt:", err);
+      }
+    }
+
     fetchQuizzes();
+    fetchActive();
   }, []);
 
   const inProgressQuiz = quizzes.find((q) => q.attemptStatus === "IN_PROGRESS");
   const completedCount = quizzes.filter(
     (q) => q.attemptStatus === "SUBMITTED",
   ).length;
+
+  const resumeQuizId = activeQuizId ?? inProgressQuiz?.id ?? null;
+  const resumeAttemptId = activeAttemptId ?? inProgressQuiz?.attemptId ?? null;
+  const resumeHref =
+    resumeQuizId && resumeAttemptId
+      ? `/student/quiz/${resumeQuizId}/solve?attemptId=${resumeAttemptId}`
+      : null;
 
   return (
     <Container size="page">
@@ -50,9 +75,9 @@ export default function StudentDashboardPage() {
           aria-label="Quick actions"
           className="flex flex-wrap items-center gap-3"
         >
-          {inProgressQuiz ? (
+          {resumeHref ? (
             <Link
-              href={`/student/quiz/${inProgressQuiz.id}`}
+              href={resumeHref}
               className="inline-flex items-center rounded-full bg-accent-500 px-5 py-2.5 text-small font-semibold text-inverse transition-colors duration-150 ease-out hover:bg-accent-600 focus:outline-2 focus:outline-offset-2 focus:outline-accent-500"
             >
               Resume quiz
@@ -137,7 +162,7 @@ export default function StudentDashboardPage() {
                   </Link>
                 </div>
                 <Link
-                  href={`/student/quiz/${inProgressQuiz.id}`}
+                  href={resumeHref ?? `/student/quiz/${inProgressQuiz.id}`}
                   className="group flex flex-col overflow-hidden rounded-[20px] border border-border bg-card transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-accent-200 sm:flex-row"
                 >
                   <div className="flex h-32 items-center justify-center bg-gradient-to-br from-primary-800 to-primary-900 sm:w-72">
