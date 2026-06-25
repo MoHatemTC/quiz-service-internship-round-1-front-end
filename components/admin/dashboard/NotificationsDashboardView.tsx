@@ -8,7 +8,7 @@
 //
 // Consumed by: app/admin/dashboard/notifications/page.tsx
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import DeliveryStatsCards from '@/components/admin/dashboard/DeliveryStatsCards';
 import InvitationStatusTable from '@/components/admin/dashboard/InvitationStatusTable';
 import { getDeliverySummary, getInvitationStatus } from '@/lib/api/admin/notifications';
@@ -19,27 +19,35 @@ export default function NotificationsDashboardView() {
   const [invitations, setInvitations] = useState<InvitationStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [s, i] = await Promise.all([
-        getDeliverySummary(),
-        getInvitationStatus(),
-      ]);
-      setSummary(s);
-      setInvitations(i);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load delivery data.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const [s, i] = await Promise.all([
+          getDeliverySummary(),
+          getInvitationStatus(),
+        ]);
+        if (!cancelled) {
+          setSummary(s);
+          setInvitations(i);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load delivery data.');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
     fetchData();
-  }, [fetchData]);
+    return () => { cancelled = true; };
+  }, [retry]);
 
   if (loading) {
     return (
@@ -55,7 +63,7 @@ export default function NotificationsDashboardView() {
       <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
         <p className="text-sm text-red-700">{error}</p>
         <button
-          onClick={fetchData}
+          onClick={() => setRetry(c => c + 1)}
           className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800"
         >
           Retry

@@ -10,7 +10,7 @@
 //
 // Consumed by: app/admin/dashboard/integrity/page.tsx
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSuspiciousAttempts, getAttemptEvents } from '@/lib/api/admin/integrity';
 import type { SuspiciousAttempt, CheatingEventSummary } from '@/types/integrity/integrity';
@@ -49,28 +49,32 @@ export default function SuspiciousAttemptsView({
   const [attempts, setAttempts] = useState<SuspiciousAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   // Expanded attempt IDs
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   // Detailed events for expanded rows
   const [detailedEvents, setDetailedEvents] = useState<Record<string, CheatingEventSummary[]>>({});
 
-  const fetchData = useCallback(async (t: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getSuspiciousAttempts({ threshold: t });
-      setAttempts(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchData(threshold);
-  }, [threshold, fetchData]);
+    let cancelled = false;
+
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getSuspiciousAttempts({ threshold });
+        if (!cancelled) setAttempts(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, [threshold, retry]);
 
   const handleThresholdChange = (value: number) => {
     setThreshold(value);
@@ -143,7 +147,7 @@ export default function SuspiciousAttemptsView({
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
           <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
           <button
-            onClick={() => fetchData(threshold)}
+            onClick={() => setRetry(c => c + 1)}
             className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800 dark:text-red-400"
           >
             Retry
