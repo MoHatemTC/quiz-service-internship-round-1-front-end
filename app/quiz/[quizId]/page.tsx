@@ -44,11 +44,19 @@ export default function QuizLinkPage() {
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : '';
         if (msg.includes('404') || msg.includes('Not Found')) {
-          setState({ status: 'error', error: 'not_found', message: 'Quiz not found or not available.' });
+          setState({
+            status: 'error',
+            error: 'not_found',
+            message: 'Quiz not found or not available.',
+          });
         } else if (msg.includes('403') || msg.includes('Forbidden')) {
           setState({ status: 'error', error: 'forbidden', message: 'Access denied.' });
         } else {
-          setState({ status: 'error', error: 'network', message: 'Failed to load quiz. Please try again.' });
+          setState({
+            status: 'error',
+            error: 'network',
+            message: 'Failed to load quiz. Please try again.',
+          });
         }
       }
     }
@@ -96,7 +104,9 @@ export default function QuizLinkPage() {
     return (
       <Container size="quiz">
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-          <span className="text-5xl" aria-hidden>{icons[state.error] || '⚠️'}</span>
+          <span className="text-5xl" aria-hidden>
+            {icons[state.error] || '⚠️'}
+          </span>
           <h1 className="text-h2 text-foreground">
             {state.error === 'not_found' && 'Quiz not found'}
             {state.error === 'forbidden' && 'Access denied'}
