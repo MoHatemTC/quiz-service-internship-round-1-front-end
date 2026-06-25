@@ -1,5 +1,3 @@
-'use client';
-
 // components/admin/dashboard/DeliveryStatsCards.tsx
 //
 // Displays aggregated email delivery stats as stat cards.
