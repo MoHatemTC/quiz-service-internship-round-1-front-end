@@ -45,6 +45,38 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     ),
   },
   {
+    label: 'Notifications',
+    href: '/admin/dashboard/notifications',
+    icon: (
+      <svg
+        viewBox="0 0 20 20"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M4 8a6 6 0 0 1 12 0c0 7 3 9 3 9H1s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 1-3.4 0" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Integrity',
+    href: '/admin/dashboard/integrity',
+    icon: (
+      <svg
+        viewBox="0 0 20 20"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M10 1.5 3 4.5v5.5c0 4.5 3 8.8 7 9.5 4-.7 7-5 7-9.5V4.5Z" />
+        <path d="m7 10 2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
     label: 'Users',
     href: '#users',
     icon: (
@@ -118,7 +150,8 @@ function SidebarItemLink({ item, active }: { item: SidebarItem; active: boolean 
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const isQuizzesActive = pathname.startsWith('/admin/dashboard');
+  // Quizzes is only active on the exact dashboard root, not sub-pages
+  const isQuizzesActive = pathname === '/admin/dashboard';
 
   return (
     <aside className="w-full bg-[#071d64] text-white lg:min-h-scree lg:w-80 lg:sticky lg:rounded-3xl lg:my-8 lg:ml-6 lg:min-w-50">
