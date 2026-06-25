@@ -37,7 +37,7 @@ function DashboardSearch() {
   };
 
   return (
-    <label className="relative w-full lg:max-w-md">
+    <label className="relative w-full max-w-md">
       <span className="sr-only">Search quizzes by title</span>
       <Search
         className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
