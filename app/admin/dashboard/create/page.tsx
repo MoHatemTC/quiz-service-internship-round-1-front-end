@@ -12,7 +12,7 @@ export default function CreateQuizPage() {
           </p>
         </div>
 
-        <div className="mx-auto w-full max-w-[1200px]">
+        <div className="mx-auto w-full max-w-300">
           <CreateQuizForm />
         </div>
       </section>
