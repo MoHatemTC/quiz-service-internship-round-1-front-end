@@ -1,24 +1,10 @@
 "use client";
 
-// app/verify-email/VerifyEmailClient.tsx
-//
-// Handles all three UI states for the email verification flow:
-//   pending          -> request in flight on mount
-//   verified          -> backend confirmed the token
-//   invalid-or-expired -> backend rejected the token (401), or no token in URL
-//
-// Uses useSearchParams (Client Component hook) rather than the page-level
-// searchParams prop, per Next.js docs guidance: this page needs reactive
-// state transitions and a retry action (resend), not just data-for-render.
-//
-// Colors/spacing/radius all come straight from DESIGN.md section 6 (Status
-// badge) and 7 (Toast/inline feedback): 10% opacity tinted background,
-// solid-color icon + text, paired icon (never color alone) per section 11.
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { verifyEmail, resendVerification, ApiError } from "@/lib/api";
+import { verifyEmail, resendVerification } from "@/lib/api/auth";
 import { VERIFICATION_STATUS, type VerificationState } from "@/types/auth";
+import Link from "next/link";
 
 export default function VerifyEmailClient() {
   const searchParams = useSearchParams();
@@ -71,7 +57,7 @@ export default function VerifyEmailClient() {
       .catch((error: unknown) => {
         if (cancelled) return;
         const message =
-          error instanceof ApiError
+          error instanceof Error
             ? error.message
             : "Something went wrong while verifying your email.";
         setState({ status: VERIFICATION_STATUS.INVALID, message });
@@ -90,12 +76,13 @@ export default function VerifyEmailClient() {
     setResendError(null);
 
     try {
-      await resendVerification(resendEmail);
+      const a = await resendVerification(resendEmail);
+      console.log(a);
       setResendStatus("sent");
     } catch (error: unknown) {
       setResendStatus("error");
       setResendError(
-        error instanceof ApiError
+        error instanceof Error
           ? error.message
           : "Something went wrong. Please try again.",
       );
@@ -163,15 +150,15 @@ function VerifiedState() {
         Email verified
       </h1>
       <p className="text-[14px] leading-5 text-[#475569]">
-        Your email has been confirmed. You can now sign in and start solving
+        Your email has been confirmed. You can now start solving
         quizzes.
       </p>
-      <a
+      <Link
         href="/login"
         className="mt-2 inline-flex items-center justify-center rounded-full bg-[#4382DF] px-5 py-3 text-[16px] font-semibold text-white transition hover:bg-[#2163C4] active:scale-[0.98]"
       >
         Continue to sign in
-      </a>
+      </Link>
     </div>
   );
 }
