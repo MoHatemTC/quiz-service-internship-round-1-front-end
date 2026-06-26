@@ -33,17 +33,15 @@ async function Dashboard({ searchParams }: searchParamsProps) {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <DashboardHeader
-            title={'Quiz Management'}
-            description={'Manage, analyze, and organize your academic library.'}
-          />
-          <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-end">
+          <div className="flex w-full flex-col gap-3 items-center lg:items-start ">
+            <DashboardHeader
+              title={'Quiz Management'}
+              description={'Manage, analyze, and organize your academic library.'}
+            />
             <DashboardSearch />
-            <div className="lg:w-[320px]">
-              <DashboardFilter />
-            </div>
           </div>
+          <DashboardFilter />
         </div>
         <div className="grid-auto-fit place-items-center gap-4">
           {DASHBOARD_STATS.map((s) => (

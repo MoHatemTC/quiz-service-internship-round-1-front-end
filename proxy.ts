@@ -16,9 +16,9 @@ export function proxy(request: NextRequest) {
 
   if (!token) {
     // Redirect to login if no token
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+    // const loginUrl = new URL('/login', request.url);
+    // loginUrl.searchParams.set('redirect', pathname);
+    // return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

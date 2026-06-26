@@ -1,17 +1,19 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BookCopy, CircleDashed, Plus, Settings2, SquarePen } from 'lucide-react';
+import { BookCopy, CheckCircle2, CircleDashed, Loader2, Settings2, Trash2 } from 'lucide-react';
 
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
 import { createAdminQuiz } from '@/lib/api/admin/quizzes';
+import { getQuestions } from '@/lib/api/admin/questions';
+import { QuestionDto } from '@/types/question/question';
 import SectionTitle from './FormSectionTitle';
 import FormLabel from './FormLabel';
 import FieldError from './FormFieldError';
@@ -27,8 +29,43 @@ const DEFAULT_VALUES: CreateQuizFormInput = {
   endDate: '',
 };
 
+const TYPE_LABELS: Record<QuestionDto['type'], string> = {
+  MCQ: 'Multiple Choice',
+  TRUE_FALSE: 'True / False',
+};
+
 function CreateQuizForm() {
   const router = useRouter();
+
+  const [allQuestions, setAllQuestions] = useState<QuestionDto[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchQuestions() {
+      try {
+        const data = await getQuestions();
+        setAllQuestions(data);
+      } catch {
+        setQuestionsError('Failed to load questions. Please refresh the page.');
+      } finally {
+        setQuestionsLoading(false);
+      }
+    }
+
+    fetchQuestions();
+  }, []);
+
+  const toggleQuestion = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const form = useForm<CreateQuizFormInput, undefined, CreateQuizFormValues>({
     resolver: zodResolver(createQuizSchema),
     defaultValues: DEFAULT_VALUES,
@@ -54,6 +91,9 @@ function CreateQuizForm() {
     await createAdminQuiz(values);
     router.push('/admin/dashboard');
   });
+
+  const selectedQuestions = allQuestions.filter((q) => selectedIds.has(q.id));
+  const unselectedQuestions = allQuestions.filter((q) => !selectedIds.has(q.id));
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6">
@@ -99,14 +139,13 @@ function CreateQuizForm() {
               <div className="grid grid-cols-2 gap-1">
                 {statusOptions.map((option) => {
                   const isActive = visibility === option.key;
-
                   return (
                     <button
                       key={option.key}
                       type="button"
-                      onClick={() => {
-                        setValue('visibilityStatus', option.key, { shouldValidate: true });
-                      }}
+                      onClick={() =>
+                        setValue('visibilityStatus', option.key, { shouldValidate: true })
+                      }
                       className={cn(
                         'rounded-xl px-4 py-3 text-small font-medium transition-colors duration-150',
                         isActive
@@ -184,41 +223,104 @@ function CreateQuizForm() {
         <div className="border-b border-divider px-6 py-5">
           <div className="flex items-center justify-between gap-4">
             <SectionTitle icon={<CircleDashed className="h-4 w-4" />} title="Questions" />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-full border-primary-200 bg-white text-primary-800 hover:bg-primary-50 hover:text-primary-900"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Question
-            </Button>
+            {selectedIds.size > 0 && (
+              <span className="rounded-full bg-primary-50 px-3 py-1 text-caption font-semibold text-primary-800">
+                {selectedIds.size} selected
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="px-6 py-6">
-          <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-primary-50/40 px-6 py-14 text-center">
-            <div className="grid gap-4">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-surface text-primary-700 shadow-sm">
-                <SquarePen className="h-5 w-5" />
-              </div>
-              <div className="grid gap-2">
-                <h3 className="text-h3 text-primary-800">No questions yet</h3>
-                <p className="max-w-md text-small text-foreground-secondary">
-                  Start building your assessment by adding multiple choice, true/false, or
-                  open-ended questions.
-                </p>
-              </div>
-              <div>
-                <Button
-                  type="button"
-                  className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create First Question
-                </Button>
-              </div>
+        <div className="grid gap-6 px-6 py-6">
+          {/* Selected questions */}
+          {selectedQuestions.length > 0 && (
+            <div className="grid gap-2">
+              <p className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                Added to quiz
+              </p>
+              <ul className="grid gap-2">
+                {selectedQuestions.map((q) => (
+                  <li
+                    key={q.id}
+                    className="flex items-start gap-3 rounded-xl border border-primary-200 bg-primary-50/60 px-4 py-3"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-700" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-small font-medium text-foreground">{q.text}</p>
+                      <p className="mt-0.5 text-caption text-muted-foreground">
+                        {TYPE_LABELS[q.type]}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Remove question"
+                      onClick={() => toggleQuestion(q.id)}
+                      className="shrink-0 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-primary-100 hover:text-error"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
+          )}
+
+          {/* Available questions pool */}
+          <div className="grid gap-2">
+            {selectedQuestions.length > 0 && (
+              <p className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                Available questions
+              </p>
+            )}
+
+            {questionsLoading && (
+              <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-small">Loading questions…</span>
+              </div>
+            )}
+
+            {questionsError && (
+              <div className="rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-small text-error">
+                {questionsError}
+              </div>
+            )}
+
+            {!questionsLoading && !questionsError && unselectedQuestions.length === 0 && (
+              <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-primary-50/40 px-6 py-10 text-center">
+                {allQuestions.length === 0 ? (
+                  <p className="text-small text-foreground-secondary">
+                    No questions available yet.
+                  </p>
+                ) : (
+                  <p className="text-small text-muted-foreground">
+                    All available questions have been added.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {!questionsLoading && !questionsError && unselectedQuestions.length > 0 && (
+              <ul className="grid gap-2">
+                {unselectedQuestions.map((q) => (
+                  <li key={q.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestion(q.id)}
+                      className="group flex w-full items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left transition-colors duration-150 hover:border-primary-200 hover:bg-primary-50/40"
+                    >
+                      <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border border-border bg-background transition-colors group-hover:border-primary-400" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-small font-medium text-foreground">{q.text}</p>
+                        <p className="mt-0.5 text-caption text-muted-foreground">
+                          {TYPE_LABELS[q.type]}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </Card>
