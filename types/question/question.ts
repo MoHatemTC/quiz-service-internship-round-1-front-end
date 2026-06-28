@@ -12,12 +12,10 @@ export type Question = {
   options: QuestionOption[];
 };
 
-// Backend question DTO (from /api/questions endpoint)
-export type QuestionDto = {
+export type StudentQuestion = {
   id: string;
-  quizId: string;
   type: QuestionType;
   text: string;
   options: string[];
-  correctAnswer: string;
+  order: number;
 };

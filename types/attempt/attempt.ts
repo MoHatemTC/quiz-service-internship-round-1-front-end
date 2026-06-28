@@ -22,8 +22,15 @@ export type AttemptAnswerDto = {
   answeredAt: string;
 };
 
+export type AttemptResultSummary = {
+  percentage: number;
+  passed: boolean;
+  gradedAt: string;
+};
+
 export type AttemptWithAnswersDto = AttemptDto & {
   answers: AttemptAnswerDto[];
+  result: AttemptResultSummary | null;
 };
 
 export type ActiveAttemptResponse = {
@@ -33,6 +40,20 @@ export type ActiveAttemptResponse = {
     startedAt: string;
     expiresAt: string | null;
   } | null;
+};
+
+export type AttemptQuestionsResponse = {
+  attemptId: string;
+  quizId: string;
+  expiresAt: string;
+  remainingSeconds: number;
+  questions: Array<{
+    id: string;
+    type: 'MCQ' | 'TRUE_FALSE';
+    text: string;
+    options: string[];
+    order: number;
+  }>;
 };
 
 export type SaveAnswersRequest = {
