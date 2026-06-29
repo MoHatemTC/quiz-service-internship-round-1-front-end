@@ -12,6 +12,7 @@ import {
 } from '@/lib/api/student';
 import Container from '@/components/shared/Container';
 import { isStaleAttemptError, toIdOrNull } from '@/lib/ids';
+import { useIntegrityTracking } from '@/lib/hooks/useIntegrityTracking';
 
 function readActiveAttemptId(
   attempt: { attemptId?: string; id?: string } | null | undefined,
@@ -94,6 +95,12 @@ export default function QuizSolvePage() {
   const answersRef = useRef<Record<string, string | null>>({});
   const submittedRef = useRef(false);
   const initRef = useRef(false);
+
+  // ── Integrity tracking: monitor tab switches, window focus, fullscreen, copy ──
+  useIntegrityTracking({
+    attemptId,
+    enabled: phase === 'ready',
+  });
 
   useEffect(() => {
     if (initRef.current) return;
