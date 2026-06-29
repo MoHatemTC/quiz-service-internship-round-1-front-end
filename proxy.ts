@@ -11,14 +11,21 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for token in cookie (set by login page)
   const token = request.cookies.get('accessToken')?.value;
 
   if (!token) {
-    // Redirect to login if no token
-    // const loginUrl = new URL('/login', request.url);
-    // loginUrl.searchParams.set('redirect', pathname);
-    // return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  if (pathname.startsWith('/admin')) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
   return NextResponse.next();

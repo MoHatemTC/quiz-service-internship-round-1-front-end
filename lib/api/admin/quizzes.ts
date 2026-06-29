@@ -10,19 +10,16 @@ export async function getAdminQuizzes(params?: {
   if (params?.search) query.set('search', params.search);
   if (params?.status) query.set('status', params.status);
   const qs = query.toString();
-  return apiFetch<QuizData[]>(`/api/admin/quizzes${qs ? `?${qs}` : ''}`, {
-    requireAuth: false,
-  });
+  return apiFetch<QuizData[]>(`/api/admin/quizzes${qs ? `?${qs}` : ''}`);
 }
 
 export async function getAdminQuizById(id: string): Promise<QuizData> {
-  return apiFetch<QuizData>(`/api/admin/quizzes/${id}`, { requireAuth: false });
+  return apiFetch<QuizData>(`/api/admin/quizzes/${id}`);
 }
 
 export async function deleteAdminQuiz(id: string): Promise<{ deleted: boolean; id: string }> {
   return apiFetch<{ deleted: boolean; id: string }>(`/api/admin/quizzes/${id}`, {
     method: 'DELETE',
-    requireAuth: false,
   });
 }
 
@@ -38,7 +35,6 @@ export async function updateAdminQuiz(id: string, values: CreateQuizFormValues):
       startsAt: values.startDate,
       endsAt: values.endDate,
     }),
-    requireAuth: false,
   });
 }
 
@@ -55,6 +51,5 @@ export async function createAdminQuiz(values: CreateQuizFormValues): Promise<Qui
       endsAt: values.endDate,
       createdById: 'cmqmalcro0000zgud0fnpw5go',
     }),
-    requireAuth: false,
   });
 }
