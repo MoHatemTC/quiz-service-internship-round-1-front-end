@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -14,7 +14,7 @@ function DashboardSearch() {
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const nextValue = searchParams.get(SEARCH_PARAM) ?? '';
     if (inputRef.current && inputRef.current.value !== nextValue) {
       inputRef.current.value = nextValue;
