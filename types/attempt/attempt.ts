@@ -9,6 +9,7 @@ export type AttemptDto = {
   status: AttemptStatus;
   score: number | null;
   maxScore: number | null;
+  expiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };

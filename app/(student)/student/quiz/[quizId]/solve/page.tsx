@@ -3,19 +3,57 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
+  getActiveAttempt,
   getAttemptQuestions,
+  getQuiz,
   saveAnswers,
   startAttempt,
   submitAttempt,
 } from '@/lib/api/student';
 import Container from '@/components/shared/Container';
+import { toIdOrNull } from '@/lib/ids';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function attemptStorageKey(quizId: string): string {
+  return `quiz-attempt:${quizId}`;
+}
 
-function toUuidOrNull(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  return UUID_RE.test(trimmed) ? trimmed : null;
+async function resolveAttemptId(
+  quizId: string,
+  fromUrl: string | null,
+): Promise<string> {
+  let id =
+    fromUrl ?? toIdOrNull(sessionStorage.getItem(attemptStorageKey(quizId)));
+  if (id) return id;
+
+  const active = await getActiveAttempt();
+  if (active.attempt?.quizId === quizId) {
+    id = toIdOrNull(active.attempt.attemptId);
+    if (id) return id;
+  }
+
+  try {
+    const attempt = await startAttempt(quizId);
+    id = toIdOrNull(attempt.id);
+    if (id) return id;
+    throw new Error('Attempt id missing from server response.');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message.toLowerCase() : '';
+    if (!msg.includes('active attempt')) {
+      throw err;
+    }
+
+    const retryActive = await getActiveAttempt();
+    if (retryActive.attempt?.quizId === quizId) {
+      id = toIdOrNull(retryActive.attempt.attemptId);
+      if (id) return id;
+    }
+
+    const quiz = await getQuiz(quizId);
+    id = toIdOrNull(quiz.attemptId);
+    if (id) return id;
+
+    throw err;
+  }
 }
 
 function formatTime(totalSeconds: number): string {
@@ -32,7 +70,7 @@ export default function QuizSolvePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = params.quizId as string;
-  const initialAttemptId = toUuidOrNull(searchParams.get('attemptId'));
+  const initialAttemptId = toIdOrNull(searchParams.get('attemptId'));
 
   const [phase, setPhase] = useState<Phase>('init');
   const [attemptId, setAttemptId] = useState<string | null>(initialAttemptId);
@@ -57,14 +95,8 @@ export default function QuizSolvePage() {
     async function init() {
       setPhase('loading');
       try {
-        let id = initialAttemptId;
-        if (!id) {
-          const attempt = await startAttempt(quizId);
-          id = toUuidOrNull(attempt.id);
-          if (!id) {
-            throw new Error('Attempt id missing from server response.');
-          }
-        }
+        const id = await resolveAttemptId(quizId, initialAttemptId);
+        sessionStorage.setItem(attemptStorageKey(quizId), id);
         attemptIdRef.current = id;
         setAttemptId(id);
 
@@ -105,6 +137,7 @@ export default function QuizSolvePage() {
           }),
         );
         await submitAttempt(id, answersArray);
+        sessionStorage.removeItem(attemptStorageKey(quizId));
         router.replace(`/student/quiz/result/${id}`);
       } catch (err) {
         console.error('Failed to submit:', err);
@@ -114,7 +147,7 @@ export default function QuizSolvePage() {
         setErrorTitle('Submission failed');
       }
     },
-    [router],
+    [quizId, router],
   );
 
   useEffect(() => {

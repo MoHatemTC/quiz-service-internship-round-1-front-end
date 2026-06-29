@@ -7,14 +7,7 @@ import { getAttemptResult } from '@/lib/api/student';
 import type { AttemptWithAnswersDto } from '@/types/attempt/attempt';
 import Breadcrumb from '@/components/shared/Breadcrumb';
 import Container from '@/components/shared/Container';
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function toUuidOrNull(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  return UUID_RE.test(trimmed) ? trimmed : null;
-}
+import { toIdOrNull } from '@/lib/ids';
 
 type LoadState =
   | { status: 'loading' }
@@ -27,7 +20,7 @@ type LoadState =
 export default function ResultPage() {
   const params = useParams();
   const router = useRouter();
-  const attemptId = toUuidOrNull(params.attemptId as string);
+  const attemptId = toIdOrNull(params.attemptId as string);
   const [state, setState] = useState<LoadState>(
     () => (attemptId ? { status: 'loading' } : { status: 'not_found' }),
   );
