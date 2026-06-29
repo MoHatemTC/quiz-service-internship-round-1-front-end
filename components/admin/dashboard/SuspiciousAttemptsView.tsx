@@ -49,6 +49,7 @@ export default function SuspiciousAttemptsView({
   const [attempts, setAttempts] = useState<SuspiciousAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [networkDown, setNetworkDown] = useState(false);
   const [retry, setRetry] = useState(0);
 
   // Expanded attempt IDs
@@ -62,11 +63,18 @@ export default function SuspiciousAttemptsView({
     async function fetchData() {
       setLoading(true);
       setError(null);
+      setNetworkDown(false);
       try {
         const data = await getSuspiciousAttempts({ threshold });
         if (!cancelled) setAttempts(data);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
+        if (!cancelled) {
+          if (err instanceof TypeError && err.message === 'Failed to fetch') {
+            setNetworkDown(true);
+          } else {
+            setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -142,13 +150,33 @@ export default function SuspiciousAttemptsView({
         </div>
       )}
 
-      {/* Error state */}
-      {error && !loading && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+      {/* Network-down state (backend unreachable) */}
+      {networkDown && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+          <p className="text-sm font-medium text-amber-700">Backend unreachable</p>
+          <p className="mt-1 text-xs text-amber-600">
+            Cannot connect to the API server. Check that Docker is running and the backend is up.
+          </p>
           <button
             onClick={() => setRetry(c => c + 1)}
-            className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800 dark:text-red-400"
+            className="mt-3 text-sm font-medium text-amber-700 underline hover:text-amber-800"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Error state (API error or permission denied) */}
+      {error && !loading && !networkDown && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <p className="text-sm font-medium text-red-700">
+            {error.includes('403') || error.includes('Forbidden')
+              ? 'Access denied. You must be logged in as an admin to view this page.'
+              : error}
+          </p>
+          <button
+            onClick={() => setRetry(c => c + 1)}
+            className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800"
           >
             Retry
           </button>
