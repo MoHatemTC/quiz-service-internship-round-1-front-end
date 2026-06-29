@@ -90,6 +90,7 @@ export default function QuizSolvePage() {
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [errorTitle, setErrorTitle] = useState<string>('Failed to load quiz');
+  const [showIntegrityNotice, setShowIntegrityNotice] = useState(true);
 
   const attemptIdRef = useRef<string | null>(initialAttemptId);
   const answersRef = useRef<Record<string, string | null>>({});
@@ -314,6 +315,58 @@ export default function QuizSolvePage() {
             </button>
           </div>
         </header>
+
+        {/* Anti-cheat integrity notice */}
+        {showIntegrityNotice && (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mt-0.5 shrink-0 text-amber-600"
+              aria-hidden
+            >
+              <path d="M10 1.5 3 4.5v5.5c0 4.5 3 8.8 7 9.5 4-.7 7-5 7-9.5V4.5Z" />
+              <path d="m7 10 2 2 4-4" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800">
+                Integrity monitoring active
+              </p>
+              <p className="text-xs text-amber-600">
+                Switching tabs, copying text, exiting fullscreen, or losing
+                window focus during this quiz will be recorded and may flag
+                your attempt for review.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowIntegrityNotice(false)}
+              className="shrink-0 text-amber-500 hover:text-amber-700"
+              aria-label="Dismiss integrity notice"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         <div className="rounded-[20px] border border-border bg-card p-8">
           <div className="mb-6 flex items-center justify-between">

@@ -10,7 +10,7 @@
 //
 // Consumed by: app/admin/dashboard/integrity/page.tsx
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSuspiciousAttempts, getAttemptEvents } from '@/lib/api/admin/integrity';
 import type { SuspiciousAttempt, CheatingEventSummary } from '@/types/integrity/integrity';
@@ -49,6 +49,7 @@ export default function SuspiciousAttemptsView({
   const [attempts, setAttempts] = useState<SuspiciousAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [networkDown, setNetworkDown] = useState(false);
   const [retry, setRetry] = useState(0);
 
   // Expanded attempt IDs
@@ -62,11 +63,18 @@ export default function SuspiciousAttemptsView({
     async function fetchData() {
       setLoading(true);
       setError(null);
+      setNetworkDown(false);
       try {
         const data = await getSuspiciousAttempts({ threshold });
         if (!cancelled) setAttempts(data);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
+        if (!cancelled) {
+          if (err instanceof TypeError && err.message === 'Failed to fetch') {
+            setNetworkDown(true);
+          } else {
+            setError(err instanceof Error ? err.message : 'Failed to load integrity data.');
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -142,13 +150,33 @@ export default function SuspiciousAttemptsView({
         </div>
       )}
 
-      {/* Error state */}
-      {error && !loading && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+      {/* Network-down state (backend unreachable) */}
+      {networkDown && !loading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+          <p className="text-sm font-medium text-amber-700">Backend unreachable</p>
+          <p className="mt-1 text-xs text-amber-600">
+            Cannot connect to the API server. Check that Docker is running and the backend is up.
+          </p>
           <button
             onClick={() => setRetry(c => c + 1)}
-            className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800 dark:text-red-400"
+            className="mt-3 text-sm font-medium text-amber-700 underline hover:text-amber-800"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Error state (API error or permission denied) */}
+      {error && !loading && !networkDown && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <p className="text-sm font-medium text-red-700">
+            {error.includes('403') || error.includes('Forbidden')
+              ? 'Access denied. You must be logged in as an admin to view this page.'
+              : error}
+          </p>
+          <button
+            onClick={() => setRetry(c => c + 1)}
+            className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-800"
           >
             Retry
           </button>
@@ -192,121 +220,114 @@ export default function SuspiciousAttemptsView({
                       const events = detailedEvents[a.attemptId] ?? a.events;
 
                       return (
-                        <tr key={a.attemptId} className="group">
-                          <td
-                            className="px-4 py-3 font-medium text-foreground hover:bg-muted/30 cursor-pointer transition-colors"
-                            colSpan={isExpanded ? 1 : undefined}
-                            onClick={() => toggleExpand(a.attemptId)}
-                          >
-                            <div>
-                              <span>{a.studentName ?? 'Unknown'}</span>
-                              <span className="ml-2 text-xs text-foreground-secondary">
-                                ({a.studentId.slice(0, 8)}...)
-                              </span>
-                            </div>
-                          </td>
-                          <td
-                            className="px-4 py-3 text-foreground-secondary hover:bg-muted/30 cursor-pointer transition-colors"
-                            onClick={() => toggleExpand(a.attemptId)}
-                          >
-                            {a.quizTitle ?? a.quizId.slice(0, 8) + '...'}
-                          </td>
-                          <td
-                            className="px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors"
-                            onClick={() => toggleExpand(a.attemptId)}
-                          >
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                                a.eventCount >= 10
-                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                  : a.eventCount >= 5
-                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                              }`}
-                            >
-                              {a.eventCount}
-                            </span>
-                          </td>
-                          <td
-                            className="px-4 py-3 text-xs text-foreground-secondary hover:bg-muted/30 cursor-pointer transition-colors"
-                            onClick={() => toggleExpand(a.attemptId)}
-                          >
-                            {formatDate(a.latestEventAt)}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <button
+                        <React.Fragment key={a.attemptId}>
+                          <tr className="group">
+                            <td
+                              className="px-4 py-3 font-medium text-foreground hover:bg-muted/30 cursor-pointer transition-colors"
                               onClick={() => toggleExpand(a.attemptId)}
-                              className="text-foreground-secondary hover:text-foreground transition-colors"
-                              aria-label={isExpanded ? 'Collapse events' : 'Expand events'}
                             >
-                              <svg
-                                viewBox="0 0 20 20"
-                                className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                                fill="currentColor"
+                              <div>
+                                <span>{a.studentName ?? 'Unknown'}</span>
+                                <span className="ml-2 text-xs text-foreground-secondary">
+                                  ({a.studentId.slice(0, 8)}...)
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              className="px-4 py-3 text-foreground-secondary hover:bg-muted/30 cursor-pointer transition-colors"
+                              onClick={() => toggleExpand(a.attemptId)}
+                            >
+                              {a.quizTitle ?? a.quizId.slice(0, 8) + '...'}
+                            </td>
+                            <td
+                              className="px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                              onClick={() => toggleExpand(a.attemptId)}
+                            >
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                                  a.eventCount >= 10
+                                    ? 'bg-red-100 text-red-700'
+                                    : a.eventCount >= 5
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'bg-yellow-100 text-yellow-700'
+                                }`}
                               >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          </td>
-                        </tr>
+                                {a.eventCount}
+                              </span>
+                            </td>
+                            <td
+                              className="px-4 py-3 text-xs text-foreground-secondary hover:bg-muted/30 cursor-pointer transition-colors"
+                              onClick={() => toggleExpand(a.attemptId)}
+                            >
+                              {formatDate(a.latestEventAt)}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => toggleExpand(a.attemptId)}
+                                className="text-foreground-secondary hover:text-foreground transition-colors"
+                                aria-label={isExpanded ? 'Collapse events' : 'Expand events'}
+                              >
+                                <svg
+                                  viewBox="0 0 20 20"
+                                  className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`events-${a.attemptId}`}>
+                              <td colSpan={5} className="px-0 py-0">
+                                <div className="border-t border-border/30 bg-muted/20 px-4 py-3">
+                                  <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground-secondary">
+                                    Cheating Events for Attempt {a.attemptId.slice(0, 8)}...
+                                  </h4>
+                                  {events.length === 0 ? (
+                                    <p className="text-xs text-foreground-secondary">No detailed events available.</p>
+                                  ) : (
+                                    <div className="max-h-64 overflow-y-auto">
+                                      <table className="w-full text-left text-xs">
+                                        <thead>
+                                          <tr className="border-b border-border/50">
+                                            <th className="py-1.5 pr-3 font-medium text-foreground-secondary">Type</th>
+                                            <th className="py-1.5 pr-3 font-medium text-foreground-secondary">Description</th>
+                                            <th className="py-1.5 font-medium text-foreground-secondary">Time</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {events.map((evt) => (
+                                            <tr key={evt.id} className="border-b border-border/30">
+                                              <td className="py-1.5 pr-3">
+                                                <EventTypeBadge type={evt.eventType} />
+                                              </td>
+                                              <td className="py-1.5 pr-3 text-foreground-secondary">
+                                                {evt.description ?? '—'}
+                                              </td>
+                                              <td className="py-1.5 whitespace-nowrap text-foreground-secondary">
+                                                {formatDate(evt.occurredAt)}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
-
-              {/* Expanded event details */}
-              {attempts.map((a) => {
-                const isExpanded = expanded.has(a.attemptId);
-                if (!isExpanded) return null;
-
-                const events = detailedEvents[a.attemptId] ?? a.events;
-
-                return (
-                  <div
-                    key={`events-${a.attemptId}`}
-                    className="-mt-2 rounded-b-xl border border-t-0 border-border bg-muted/20 px-4 pb-4 pt-2"
-                  >
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground-secondary">
-                      Cheating Events for Attempt {a.attemptId.slice(0, 8)}...
-                    </h4>
-                    {events.length === 0 ? (
-                      <p className="text-xs text-foreground-secondary">No detailed events available.</p>
-                    ) : (
-                      <div className="max-h-64 overflow-y-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead>
-                            <tr className="border-b border-border/50">
-                              <th className="py-1.5 pr-3 font-medium text-foreground-secondary">Type</th>
-                              <th className="py-1.5 pr-3 font-medium text-foreground-secondary">Description</th>
-                              <th className="py-1.5 font-medium text-foreground-secondary">Time</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {events.map((evt) => (
-                              <tr key={evt.id} className="border-b border-border/30">
-                                <td className="py-1.5 pr-3">
-                                  <EventTypeBadge type={evt.eventType} />
-                                </td>
-                                <td className="py-1.5 pr-3 text-foreground-secondary">
-                                  {evt.description ?? '—'}
-                                </td>
-                                <td className="py-1.5 whitespace-nowrap text-foreground-secondary">
-                                  {formatDate(evt.occurredAt)}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           )}
         </>
