@@ -13,6 +13,7 @@ function DashboardSearch() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const nextValue = searchParams.get(SEARCH_PARAM) ?? '';
@@ -48,7 +49,8 @@ function DashboardSearch() {
         defaultValue={searchParams.get(SEARCH_PARAM) ?? ''}
         onChange={(event) => {
           const nextValue = event.target.value;
-          updateSearch(nextValue);
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => updateSearch(nextValue), 300);
         }}
         placeholder="Search quizzes"
         aria-label="Search quizzes by title"
