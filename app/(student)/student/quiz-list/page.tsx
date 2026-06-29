@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { getQuizzes } from '@/lib/api/student';
 import type { QuizDto } from '@/types/quiz/student';
+import { useQuizSearch } from '@/components/shared/QuizSearchProvider';
 import Breadcrumb from '@/components/shared/Breadcrumb';
 import Container from '@/components/shared/Container';
 import SectionHeader from '@/components/shared/SectionHeader';
+import { filterByTitle } from '@/lib/quiz-filter';
 
 const statusLabels: Record<QuizDto['attemptStatus'], string> = {
   NOT_STARTED: 'Not started',
@@ -25,6 +27,12 @@ const statusStyles: Record<QuizDto['attemptStatus'], string> = {
 export default function StudentQuizListPage() {
   const [quizzes, setQuizzes] = useState<QuizDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const { query } = useQuizSearch();
+
+  const filteredQuizzes = useMemo(
+    () => filterByTitle(quizzes, query),
+    [quizzes, query],
+  );
 
   useEffect(() => {
     async function fetchQuizzes() {
@@ -51,7 +59,7 @@ export default function StudentQuizListPage() {
           ]}
         />
 
-        <SectionHeader title="My Quizzes" />
+        <SectionHeader title="My Quizzes" showSearch={false} />
 
         {loading ? (
           <div className="text-center text-foreground-secondary">Loading quizzes...</div>
@@ -62,9 +70,16 @@ export default function StudentQuizListPage() {
               Check back later or contact your admin.
             </p>
           </div>
+        ) : filteredQuizzes.length === 0 ? (
+          <div className="rounded-[20px] border border-dashed border-border bg-surface px-6 py-16 text-center">
+            <h3 className="text-h3 text-foreground">No quizzes match your search</h3>
+            <p className="mt-2 text-small text-foreground-secondary">
+              Try a different title in the search bar above.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {quizzes.map((quiz) => (
+            {filteredQuizzes.map((quiz) => (
               <Link
                 key={quiz.id}
                 href={`/student/quiz/${quiz.id}`}

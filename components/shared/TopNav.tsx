@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { useQuizSearch } from "@/components/shared/QuizSearchProvider";
 import { clearToken } from "@/lib/auth/session";
 
 type NavItem = {
@@ -77,6 +79,20 @@ const NAV_ITEMS: NavItem[] = [
 export default function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { query, setQuery } = useQuizSearch();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleLogout = () => {
     clearToken();
@@ -139,8 +155,20 @@ export default function TopNav() {
               </svg>
             </span>
             <input
+              ref={searchInputRef}
               type="search"
-              placeholder="Search quizzes, courses..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  query.trim() &&
+                  pathname !== "/student/quiz-list"
+                ) {
+                  router.push("/student/quiz-list");
+                }
+              }}
+              placeholder="Search quizzes by title..."
               className="w-64 rounded-full border border-border bg-surface py-1.5 pl-8 pr-12 text-small text-foreground placeholder:text-muted focus-visible:border-accent-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
             />
             <span className="pointer-events-none absolute right-2 inline-flex items-center gap-0.5 rounded border border-border bg-surface px-1.5 py-0.5 text-caption text-muted">

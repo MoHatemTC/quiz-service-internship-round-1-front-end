@@ -2,15 +2,18 @@ type SectionHeaderProps = {
   title: string;
   searchPlaceholder?: string;
   onSearch?: (value: string) => void;
+  showSearch?: boolean;
 };
 
 export default function SectionHeader({
   title,
   searchPlaceholder = 'Search courses...',
+  showSearch = true,
 }: SectionHeaderProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-h2 text-foreground">{title}</h2>
+      {showSearch ? (
       <div className="flex items-center gap-3">
         <label className="relative flex flex-1 items-center sm:flex-none">
           <span className="sr-only">Search</span>
@@ -62,6 +65,7 @@ export default function SectionHeader({
           Filters
         </button>
       </div>
+      ) : null}
     </div>
   );
 }

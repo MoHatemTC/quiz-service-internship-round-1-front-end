@@ -3,19 +3,65 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
+  getActiveAttempt,
   getAttemptQuestions,
+  getQuiz,
   saveAnswers,
   startAttempt,
   submitAttempt,
 } from '@/lib/api/student';
 import Container from '@/components/shared/Container';
+import { isStaleAttemptError, toIdOrNull } from '@/lib/ids';
+import { useIntegrityTracking } from '@/lib/hooks/useIntegrityTracking';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function readActiveAttemptId(
+  attempt: { attemptId?: string; id?: string } | null | undefined,
+): string | null {
+  if (!attempt) return null;
+  return toIdOrNull(attempt.attemptId ?? attempt.id);
+}
 
-function toUuidOrNull(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  return UUID_RE.test(trimmed) ? trimmed : null;
+function attemptStorageKey(quizId: string): string {
+  return `quiz-attempt:${quizId}`;
+}
+
+async function resolveAttemptId(
+  quizId: string,
+  fromUrl: string | null,
+): Promise<string> {
+  let id =
+    fromUrl ?? toIdOrNull(sessionStorage.getItem(attemptStorageKey(quizId)));
+  if (id) return id;
+
+  const active = await getActiveAttempt();
+  if (active.attempt?.quizId === quizId) {
+    id = readActiveAttemptId(active.attempt);
+    if (id) return id;
+  }
+
+  try {
+    const attempt = await startAttempt(quizId);
+    id = toIdOrNull(attempt.id);
+    if (id) return id;
+    throw new Error('Attempt id missing from server response.');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message.toLowerCase() : '';
+    if (!msg.includes('active attempt')) {
+      throw err;
+    }
+
+    const retryActive = await getActiveAttempt();
+    if (retryActive.attempt?.quizId === quizId) {
+      id = readActiveAttemptId(retryActive.attempt);
+      if (id) return id;
+    }
+
+    const quiz = await getQuiz(quizId);
+    id = toIdOrNull(quiz.attemptId);
+    if (id) return id;
+
+    throw err;
+  }
 }
 
 function formatTime(totalSeconds: number): string {
@@ -32,7 +78,7 @@ export default function QuizSolvePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = params.quizId as string;
-  const initialAttemptId = toUuidOrNull(searchParams.get('attemptId'));
+  const initialAttemptId = toIdOrNull(searchParams.get('attemptId'));
 
   const [phase, setPhase] = useState<Phase>('init');
   const [attemptId, setAttemptId] = useState<string | null>(initialAttemptId);
@@ -50,6 +96,12 @@ export default function QuizSolvePage() {
   const submittedRef = useRef(false);
   const initRef = useRef(false);
 
+  // ── Integrity tracking: monitor tab switches, window focus, fullscreen, copy ──
+  useIntegrityTracking({
+    attemptId,
+    enabled: phase === 'ready',
+  });
+
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
@@ -57,14 +109,8 @@ export default function QuizSolvePage() {
     async function init() {
       setPhase('loading');
       try {
-        let id = initialAttemptId;
-        if (!id) {
-          const attempt = await startAttempt(quizId);
-          id = toUuidOrNull(attempt.id);
-          if (!id) {
-            throw new Error('Attempt id missing from server response.');
-          }
-        }
+        const id = await resolveAttemptId(quizId, initialAttemptId);
+        sessionStorage.setItem(attemptStorageKey(quizId), id);
         attemptIdRef.current = id;
         setAttemptId(id);
 
@@ -79,8 +125,17 @@ export default function QuizSolvePage() {
           router.replace(`/student/quiz/${quizId}/solve?attemptId=${id}`);
         }
       } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        const id = attemptIdRef.current;
+
+        if (id && isStaleAttemptError(msg)) {
+          sessionStorage.removeItem(attemptStorageKey(quizId));
+          router.replace(`/student/quiz/result/${id}`);
+          return;
+        }
+
         console.error('Failed to start attempt:', err);
-        setError(err instanceof Error ? err.message : 'Failed to start attempt.');
+        setError(msg || 'Failed to start attempt.');
         setPhase('error');
       }
     }
@@ -105,16 +160,23 @@ export default function QuizSolvePage() {
           }),
         );
         await submitAttempt(id, answersArray);
+        sessionStorage.removeItem(attemptStorageKey(quizId));
         router.replace(`/student/quiz/result/${id}`);
       } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (isStaleAttemptError(msg)) {
+          sessionStorage.removeItem(attemptStorageKey(quizId));
+          router.replace(`/student/quiz/result/${id}`);
+          return;
+        }
         console.error('Failed to submit:', err);
         submittedRef.current = false;
         setPhase('ready');
-        setError(err instanceof Error ? err.message : 'Failed to submit attempt.');
+        setError(msg || 'Failed to submit attempt.');
         setErrorTitle('Submission failed');
       }
     },
-    [router],
+    [quizId, router],
   );
 
   useEffect(() => {
@@ -133,9 +195,12 @@ export default function QuizSolvePage() {
   }, [secondsLeft, phase, doSubmit]);
 
   useEffect(() => {
+    if (phase !== 'ready') return;
     if (!attemptId || Object.keys(answers).length === 0) return;
 
     const timer = setTimeout(async () => {
+      if (submittedRef.current) return;
+
       try {
         const answersArray = Object.entries(answers).map(
           ([questionId, selectedOptionId]) => ({
@@ -145,10 +210,13 @@ export default function QuizSolvePage() {
         );
         await saveAnswers(attemptId, answersArray);
       } catch (err) {
+        if (submittedRef.current) return;
+
         const msg = err instanceof Error ? err.message : '';
-        if (msg.includes('409')) {
+        if (isStaleAttemptError(msg)) {
           const id = attemptIdRef.current;
           if (id) {
+            sessionStorage.removeItem(attemptStorageKey(quizId));
             router.replace(`/student/quiz/result/${id}`);
           }
           return;
@@ -158,7 +226,7 @@ export default function QuizSolvePage() {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [answers, attemptId, router]);
+  }, [answers, attemptId, phase, quizId, router]);
 
   const handleSelect = (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
