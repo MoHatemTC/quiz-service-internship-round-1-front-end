@@ -7,26 +7,15 @@ function getStatusClassName(status: QuizStatus) {
       return 'text-success before:bg-success';
     case 'DRAFT':
       return 'text-warning before:bg-warning';
+    case 'CLOSED':
+      return 'text-destructive before:bg-destructive';
+    case 'ARCHIVED':
+      return 'text-muted-foreground before:bg-muted-foreground';
   }
 }
 
-function DashboardQuizTable({
-  data,
-  filter,
-  search,
-}: {
-  data: QuizData[];
-  filter: string | undefined;
-  search: string;
-}) {
-  const normalizedSearch = search.toLowerCase();
-  const filteredQuizzes = data.filter((q) => {
-    const matchesStatus = filter === 'all' ? true : q.status === filter;
-    const matchesSearch =
-      normalizedSearch === '' || q.title.toLowerCase().includes(normalizedSearch);
-
-    return matchesStatus && matchesSearch;
-  });
+function DashboardQuizTable({ data }: { data: QuizData[] }) {
+  const filteredQuizzes = data;
 
   return (
     <section className="quiz-table-card" aria-label="Quiz table">

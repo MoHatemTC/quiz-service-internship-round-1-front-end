@@ -2,7 +2,7 @@ export const QUIZ_STATUS = {
   PUBLISHED: 'PUBLISHED',
   DRAFT: 'DRAFT',
   CLOSED: 'CLOSED',
-  ARCHIEVED: 'ARCHIEVED',
+  ARCHIVED: 'ARCHIVED',
 } as const;
 
 export type QuizStatus = (typeof QUIZ_STATUS)[keyof typeof QUIZ_STATUS];

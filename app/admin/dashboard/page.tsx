@@ -7,7 +7,7 @@ import { DASHBOARD_STATS } from '@/constants';
 import { searchParamsProps } from '@/types';
 import { getAdminQuizzes } from '@/lib/api/admin/quizzes';
 
-const VALID_FILTERS = ['all', 'PUBLISHED', 'DRAFT'] as const;
+const VALID_FILTERS = ['all', 'PUBLISHED', 'DRAFT', 'CLOSED', 'ARCHIVED'] as const;
 type QuizFilter = (typeof VALID_FILTERS)[number];
 
 function parseFilter(value: unknown): QuizFilter {
@@ -28,7 +28,10 @@ async function Dashboard({ searchParams }: searchParamsProps) {
   const params = await searchParams;
   const statusFilter = parseFilter(params.status);
   const searchTerm = parseSearch(params.search);
-  const quizzesData = await getAdminQuizzes();
+  const quizzesData = await getAdminQuizzes({
+    search: searchTerm || undefined,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+  });
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -48,7 +51,7 @@ async function Dashboard({ searchParams }: searchParamsProps) {
             <StatsCard key={s.id} icon={s.icon} label={s.label} value={s.value} />
           ))}
         </div>
-        <DashboardQuizTable filter={statusFilter} search={searchTerm} data={quizzesData} />
+        <DashboardQuizTable data={quizzesData} />
       </section>
     </main>
   );

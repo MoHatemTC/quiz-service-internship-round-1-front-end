@@ -2,8 +2,17 @@ import { apiFetch } from '@/lib/api/client';
 import { QuizData } from '@/types/quiz/admin';
 import { CreateQuizFormValues } from '@/lib/validation';
 
-export async function getAdminQuizzes(): Promise<QuizData[]> {
-  return apiFetch<QuizData[]>('/api/admin/quizzes', { requireAuth: false });
+export async function getAdminQuizzes(params?: {
+  search?: string;
+  status?: string;
+}): Promise<QuizData[]> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set('search', params.search);
+  if (params?.status) query.set('status', params.status);
+  const qs = query.toString();
+  return apiFetch<QuizData[]>(`/api/admin/quizzes${qs ? `?${qs}` : ''}`, {
+    requireAuth: false,
+  });
 }
 
 export async function getAdminQuizById(id: string): Promise<QuizData> {

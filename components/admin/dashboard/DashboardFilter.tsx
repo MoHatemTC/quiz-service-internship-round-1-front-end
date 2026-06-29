@@ -8,7 +8,7 @@ const FILTERS: QuizFilterOptions[] = [
   { key: 'PUBLISHED', label: 'Published' },
   { key: 'DRAFT', label: 'Drafts' },
   { key: 'CLOSED', label: 'Closed' },
-  { key: 'ARCHIEVED', label: 'Archieved' },
+  { key: 'ARCHIVED', label: 'Archived' },
 ];
 
 function DashboardFilter() {
