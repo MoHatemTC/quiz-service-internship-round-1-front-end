@@ -11,7 +11,14 @@ import {
   submitAttempt,
 } from '@/lib/api/student';
 import Container from '@/components/shared/Container';
-import { toIdOrNull } from '@/lib/ids';
+import { isStaleAttemptError, toIdOrNull } from '@/lib/ids';
+
+function readActiveAttemptId(
+  attempt: { attemptId?: string; id?: string } | null | undefined,
+): string | null {
+  if (!attempt) return null;
+  return toIdOrNull(attempt.attemptId ?? attempt.id);
+}
 
 function attemptStorageKey(quizId: string): string {
   return `quiz-attempt:${quizId}`;
@@ -27,7 +34,7 @@ async function resolveAttemptId(
 
   const active = await getActiveAttempt();
   if (active.attempt?.quizId === quizId) {
-    id = toIdOrNull(active.attempt.attemptId);
+    id = readActiveAttemptId(active.attempt);
     if (id) return id;
   }
 
@@ -44,7 +51,7 @@ async function resolveAttemptId(
 
     const retryActive = await getActiveAttempt();
     if (retryActive.attempt?.quizId === quizId) {
-      id = toIdOrNull(retryActive.attempt.attemptId);
+      id = readActiveAttemptId(retryActive.attempt);
       if (id) return id;
     }
 
@@ -111,8 +118,17 @@ export default function QuizSolvePage() {
           router.replace(`/student/quiz/${quizId}/solve?attemptId=${id}`);
         }
       } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        const id = attemptIdRef.current;
+
+        if (id && isStaleAttemptError(msg)) {
+          sessionStorage.removeItem(attemptStorageKey(quizId));
+          router.replace(`/student/quiz/result/${id}`);
+          return;
+        }
+
         console.error('Failed to start attempt:', err);
-        setError(err instanceof Error ? err.message : 'Failed to start attempt.');
+        setError(msg || 'Failed to start attempt.');
         setPhase('error');
       }
     }
@@ -140,10 +156,16 @@ export default function QuizSolvePage() {
         sessionStorage.removeItem(attemptStorageKey(quizId));
         router.replace(`/student/quiz/result/${id}`);
       } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (isStaleAttemptError(msg)) {
+          sessionStorage.removeItem(attemptStorageKey(quizId));
+          router.replace(`/student/quiz/result/${id}`);
+          return;
+        }
         console.error('Failed to submit:', err);
         submittedRef.current = false;
         setPhase('ready');
-        setError(err instanceof Error ? err.message : 'Failed to submit attempt.');
+        setError(msg || 'Failed to submit attempt.');
         setErrorTitle('Submission failed');
       }
     },
@@ -166,9 +188,12 @@ export default function QuizSolvePage() {
   }, [secondsLeft, phase, doSubmit]);
 
   useEffect(() => {
+    if (phase !== 'ready') return;
     if (!attemptId || Object.keys(answers).length === 0) return;
 
     const timer = setTimeout(async () => {
+      if (submittedRef.current) return;
+
       try {
         const answersArray = Object.entries(answers).map(
           ([questionId, selectedOptionId]) => ({
@@ -178,10 +203,13 @@ export default function QuizSolvePage() {
         );
         await saveAnswers(attemptId, answersArray);
       } catch (err) {
+        if (submittedRef.current) return;
+
         const msg = err instanceof Error ? err.message : '';
-        if (msg.includes('409')) {
+        if (isStaleAttemptError(msg)) {
           const id = attemptIdRef.current;
           if (id) {
+            sessionStorage.removeItem(attemptStorageKey(quizId));
             router.replace(`/student/quiz/result/${id}`);
           }
           return;
@@ -191,7 +219,7 @@ export default function QuizSolvePage() {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [answers, attemptId, router]);
+  }, [answers, attemptId, phase, quizId, router]);
 
   const handleSelect = (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
