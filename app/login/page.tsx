@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api/auth";
+import { getUser } from "@/lib/auth/session";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +19,8 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/student");
+      const user = getUser();
+      router.push(user?.role === 'ADMIN' ? '/admin/dashboard' : '/student');
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

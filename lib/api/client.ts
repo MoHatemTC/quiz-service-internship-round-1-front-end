@@ -16,10 +16,19 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     ...fetchOptions.headers,
   };
 
-  if (requireAuth && typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  if (requireAuth) {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+      }
+    } else {
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const token = cookieStore.get('accessToken')?.value;
+      if (token) {
+        (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+      }
     }
   }
 
