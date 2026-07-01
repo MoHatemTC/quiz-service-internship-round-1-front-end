@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
 import { createAdminQuiz } from '@/lib/api/admin/quizzes';
 import { getQuestions } from '@/lib/api/admin/questions';
-import { Question } from '@/types/question/question';
+import { Question, StudentQuestion } from '@/types/question/question';
 import SectionTitle from './FormSectionTitle';
 import FormLabel from './FormLabel';
 import FieldError from './FormFieldError';
@@ -37,7 +37,7 @@ const TYPE_LABELS: Record<Question['type'], string> = {
 function CreateQuizForm() {
   const router = useRouter();
 
-  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+  const [allQuestions, setAllQuestions] = useState<StudentQuestion[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [questionsError, setQuestionsError] = useState<string | null>(null);
@@ -252,7 +252,7 @@ function CreateQuizForm() {
                   >
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-700" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-small font-medium text-foreground">{q.prompt}</p>
+                      <p className="text-small font-medium text-foreground">{q.text}</p>
                       <p className="mt-0.5 text-caption text-muted-foreground">
                         {TYPE_LABELS[q.type]}
                       </p>
@@ -317,7 +317,7 @@ function CreateQuizForm() {
                     >
                       <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border border-border bg-background transition-colors group-hover:border-primary-400" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-small font-medium text-foreground">{q.prompt}</p>
+                        <p className="text-small font-medium text-foreground">{q.text}</p>
                         <p className="mt-0.5 text-caption text-muted-foreground">
                           {TYPE_LABELS[q.type]}
                         </p>
