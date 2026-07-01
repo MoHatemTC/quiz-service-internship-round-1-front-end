@@ -24,13 +24,20 @@ function parseSearch(value: unknown) {
   return value.trim();
 }
 
+function parsePage(value: unknown): number {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : 1;
+}
+
 async function Dashboard({ searchParams }: searchParamsProps) {
   const params = await searchParams;
   const statusFilter = parseFilter(params.status);
   const searchTerm = parseSearch(params.search);
-  const quizzesData = await getAdminQuizzes({
+  const currentPage = parsePage(params.page);
+  const data = await getAdminQuizzes({
     search: searchTerm || undefined,
     status: statusFilter !== 'all' ? statusFilter : undefined,
+    page: currentPage,
   });
 
   return (
@@ -51,7 +58,7 @@ async function Dashboard({ searchParams }: searchParamsProps) {
             <StatsCard key={s.id} icon={s.icon} label={s.label} value={s.value} />
           ))}
         </div>
-        <DashboardQuizTable data={quizzesData} />
+        <DashboardQuizTable data={data} />
       </section>
     </main>
   );

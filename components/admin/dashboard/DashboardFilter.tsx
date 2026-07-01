@@ -27,6 +27,7 @@ function DashboardFilter() {
     } else {
       params.set('status', value);
     }
+    params.delete('page');
 
     const queryString = params.toString();
     router.push(queryString ? `${pathname}?${queryString}` : pathname, {

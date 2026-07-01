@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { CreateQuizFormInput, CreateQuizFormValues, createQuizSchema } from '@/lib/validation';
 import { createAdminQuiz } from '@/lib/api/admin/quizzes';
 import { getQuestions } from '@/lib/api/admin/questions';
-import { QuestionDto } from '@/types/question/question';
+import { Question, StudentQuestion } from '@/types/question/question';
 import SectionTitle from './FormSectionTitle';
 import FormLabel from './FormLabel';
 import FieldError from './FormFieldError';
@@ -29,7 +29,7 @@ const DEFAULT_VALUES: CreateQuizFormInput = {
   endDate: '',
 };
 
-const TYPE_LABELS: Record<QuestionDto['type'], string> = {
+const TYPE_LABELS: Record<Question['type'], string> = {
   MCQ: 'Multiple Choice',
   TRUE_FALSE: 'True / False',
 };
@@ -37,7 +37,7 @@ const TYPE_LABELS: Record<QuestionDto['type'], string> = {
 function CreateQuizForm() {
   const router = useRouter();
 
-  const [allQuestions, setAllQuestions] = useState<QuestionDto[]>([]);
+  const [allQuestions, setAllQuestions] = useState<StudentQuestion[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [questionsError, setQuestionsError] = useState<string | null>(null);
@@ -88,8 +88,14 @@ function CreateQuizForm() {
   ] as const;
 
   const onSubmit = handleSubmit(async (values) => {
-    await createAdminQuiz(values);
-    router.push('/admin/dashboard');
+    try {
+      await createAdminQuiz(values);
+      router.push('/admin/dashboard');
+    } catch (err) {
+      form.setError('root', {
+        message: err instanceof Error ? err.message : 'Failed to create quiz. Please try again.',
+      });
+    }
   });
 
   const selectedQuestions = allQuestions.filter((q) => selectedIds.has(q.id));
@@ -325,7 +331,8 @@ function CreateQuizForm() {
         </div>
       </Card>
 
-      <div className="flex justify-end pt-2">
+      <div className="flex flex-col items-end gap-2 pt-2">
+        {errors.root?.message && <FieldError message={errors.root.message} />}
         <Button
           type="submit"
           className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700 disabled:bg-primary-400"

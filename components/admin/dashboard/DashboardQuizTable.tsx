@@ -1,5 +1,6 @@
-import { QuizData, QuizStatus } from '@/types/quiz/admin';
+import { PaginatedQuizData, QuizStatus } from '@/types/quiz/admin';
 import QuizCardActions from './QuizActions';
+import QuizTablePagination from './QuizTablePagination';
 
 function getStatusClassName(status: QuizStatus) {
   switch (status) {
@@ -14,8 +15,8 @@ function getStatusClassName(status: QuizStatus) {
   }
 }
 
-function DashboardQuizTable({ data }: { data: QuizData[] }) {
-  const filteredQuizzes = data;
+function DashboardQuizTable({ data }: { data: PaginatedQuizData }) {
+  const { quizzes, page, totalItems, totalPages, hasNextPage, hasPreviousPage } = data;
 
   return (
     <section className="quiz-table-card" aria-label="Quiz table">
@@ -34,8 +35,8 @@ function DashboardQuizTable({ data }: { data: QuizData[] }) {
             </tr>
           </thead>
           <tbody>
-            {filteredQuizzes.length > 0 ? (
-              filteredQuizzes.map((quiz) => (
+            {quizzes.length > 0 ? (
+              quizzes.map((quiz) => (
                 <tr key={quiz.id}>
                   <td>
                     <div className="quiz-title-cell">
@@ -77,22 +78,14 @@ function DashboardQuizTable({ data }: { data: QuizData[] }) {
 
       <div className="quiz-table-footer text-small">
         <p>
-          Showing <strong>{filteredQuizzes.length}</strong> of{' '}
-          <strong>{filteredQuizzes.length}</strong> quizzes
+          Showing <strong>{quizzes.length}</strong> of <strong>{totalItems}</strong> quizzes
         </p>
-        <div className="quiz-pagination" aria-label="Quiz pagination">
-          <button type="button" aria-label="Previous page">
-            Prev
-          </button>
-          <button type="button" aria-current="page" className="active">
-            1
-          </button>
-          <button type="button">2</button>
-          <button type="button">3</button>
-          <button type="button" aria-label="Next page">
-            Next
-          </button>
-        </div>
+        <QuizTablePagination
+          page={page}
+          totalPages={totalPages}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+        />
       </div>
     </section>
   );
