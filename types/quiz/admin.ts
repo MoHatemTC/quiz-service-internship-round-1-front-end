@@ -21,6 +21,16 @@ export type QuizData = {
   updatedAt: string;
 };
 
+export type PaginatedQuizData = {
+  quizzes: QuizData[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
 export type QuizFilterOptions = {
   key: 'all' | QuizStatus;
   label: string;

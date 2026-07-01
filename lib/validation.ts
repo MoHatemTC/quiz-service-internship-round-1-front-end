@@ -15,10 +15,14 @@ export const createQuizSchema = z
       .number({ error: 'Passing score must be a number.' })
       .min(0, 'Passing score cannot be less than 0.')
       .max(100, 'Passing score cannot exceed 100.'),
-    startDate: z.string().min(1, 'Start date is required.'),
-    endDate: z.string().min(1, 'End date is required.'),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
   })
-  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
-    message: 'End date must be on or after the start date.',
-    path: ['endDate'],
-  });
+  .refine(
+    (data) =>
+      !data.startDate || !data.endDate || new Date(data.endDate) >= new Date(data.startDate),
+    {
+      message: 'End date must be on or after the start date.',
+      path: ['endDate'],
+    }
+  );

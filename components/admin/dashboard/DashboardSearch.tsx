@@ -30,6 +30,7 @@ function DashboardSearch() {
     } else {
       params.set(SEARCH_PARAM, nextValue);
     }
+    params.delete('page');
 
     const queryString = params.toString();
     router.replace(queryString ? `${pathname}?${queryString}` : pathname, {

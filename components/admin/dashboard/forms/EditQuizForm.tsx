@@ -43,8 +43,14 @@ function EditQuizForm({ id, ...defaultValues }: EditQuizFormProps) {
   ] as const;
 
   const onSubmit = handleSubmit(async (values) => {
-    await updateAdminQuiz(id, values);
-    router.push('/admin/dashboard');
+    try {
+      await updateAdminQuiz(id, values);
+      router.push('/admin/dashboard');
+    } catch (err) {
+      form.setError('root', {
+        message: err instanceof Error ? err.message : 'Failed to update quiz. Please try again.',
+      });
+    }
   });
 
   return (
@@ -217,7 +223,8 @@ function EditQuizForm({ id, ...defaultValues }: EditQuizFormProps) {
         </div>
       </Card>
 
-      <div className="flex justify-end pt-2">
+      <div className="flex flex-col items-end gap-2 pt-2">
+        {errors.root?.message && <FieldError message={errors.root.message} />}
         <Button
           type="submit"
           className="rounded-full bg-primary-800 px-6 text-white hover:bg-primary-700"
